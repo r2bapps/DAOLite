@@ -1,4 +1,4 @@
 DAOLite
 =======
 
-A generic lite DAO for Android
+A generic & lite DAO for Android
