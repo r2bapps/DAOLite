@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="r2b.apps"
+    android:versionCode="0"
+    android:versionName="0.1" >
+
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="19" />
+
+    <application 
+        android:name="r2b.apps.AppController"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher" />
+
+</manifest>
