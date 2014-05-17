@@ -7,7 +7,7 @@ A generic & lite DAO for Android
 
 Description
 ===========
-You can use for your Android proyects ORMLite, GreenDAO or another ORM. You 
+You can use for your Android projects ORMLite, GreenDAO or another ORM. You 
 can make your own DAOs or your SQL queries.
 If you do not need the powerful of an ORM and you don have time to waste 
 creating your own DAOs, this is your solution.
@@ -19,7 +19,7 @@ The module does not use reflectivity so massive, only a few calls in order
 to be much more efficient than models with reflectivity. Neither requires 
 extending an abstract class so that your models can be as complex as you want.
 
-The main clases are:
+The main classes are:
 * GenericDAO, the DAO headers.
 * GenericDaoImpl, the DAO implementation.
 * DBEntity, interface to implement your models.
