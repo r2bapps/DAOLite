@@ -32,22 +32,42 @@
 
 package r2b.apps.db;
 
-import r2b.apps.model.Employee;
+import r2b.apps.utils.Cons;
 import r2b.apps.utils.Logger;
 import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+
 public final class DatabaseHandler extends SQLiteOpenHelper {
 
+	/*
+	 * The SqliteOpenHelper object holds on to one database connection. 
+	 * It appears to offer you a read and write connection, but it really 
+	 * doesn't. Call the read-only, and you'll get the write database 
+	 * connection regardless.
+	 * 
+	 * So, one helper instance, one db connection. Even if you use it from 
+	 * multiple threads, one connection at a time. The SqliteDatabase object 
+	 * uses java locks to keep access serialized. So, if 100 threads have 
+	 * one db instance, calls to the actual on-disk database are serialized.
+	 * 
+	 * So, one helper, one db connection, which is serialized in java code. 
+	 * One thread, 1000 threads, if you use one helper instance shared between 
+	 * them, all of your db access code is serial. And life is good (ish).
+	 * 
+	 * If you try to write to the database from actual distinct connections at 
+	 * the same time, one will fail. It will not wait till the first is done 
+	 * and then write. It will simply not write your change.
+	 */
 
 	// Tables
-	public static final String TABLE_EMPLOYEE = Employee.class.getSimpleName();
+	public static final String TABLE_EMPLOYEE = "Employee"; // TODO GET ENTITY NAME
 
 	
 	// Employee Columns
-	public static final String COL_EMPLOYEE_ID = Employee.COL_ID;
+	public static final String COL_EMPLOYEE_ID = Cons.DB.COLD_ID;
 	public static final String COL_EMPLOYEE_NAME = "name";
 	public static final String COL_EMPLOYEE_SURNAME = "surname";
 	public static final String COL_EMPLOYEE_ACTIVE = "active";
@@ -56,11 +76,11 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	/**
 	 * Database version.
 	 */
-	public static final int DATABASE_VERSION = 1;
+	public static final int DATABASE_VERSION = Cons.DB.DATABASE_VERSION;
 	/**
 	 * Database name.
 	 */
-	public static final String DATABASE_NAME = "r2b.apps.genericdaolite.db";	
+	public static final String DATABASE_NAME = Cons.DB.DATABASE_NAME;	
 	/**
 	 * Handler instance.
 	 */
@@ -195,8 +215,8 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	/**
 	 * Clear all db data.
 	 */
-	public void clear() {
-		onUpgrade(db, DATABASE_VERSION, 0);
+	public synchronized void clear() {
+		onUpgrade(db, DATABASE_VERSION, DATABASE_VERSION-1);
 	}
 	
 }

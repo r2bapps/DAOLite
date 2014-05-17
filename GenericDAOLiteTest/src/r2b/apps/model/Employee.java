@@ -37,7 +37,7 @@ import r2b.apps.db.DatabaseHandler;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-public class Employee implements DBEntity {
+public class Employee implements DBEntity<Integer> {
 
 	private Integer id;
 	private String name;
@@ -55,7 +55,7 @@ public class Employee implements DBEntity {
 	public ContentValues getTableContentValues() {
 		ContentValues values = new ContentValues();	
 		
-		values.put(DatabaseHandler.COL_EMPLOYEE_ID, id);
+		values.put(DatabaseHandler.COL_EMPLOYEE_ID, DBEntity.COL_ID);
 	    values.put(DatabaseHandler.COL_EMPLOYEE_NAME, name);
 	    values.put(DatabaseHandler.COL_EMPLOYEE_SURNAME, surname);
 	    // BOOLEAN in 0 (false) and 1 (true)
@@ -74,7 +74,7 @@ public class Employee implements DBEntity {
 		this.id = id;
 	}
 	
-	public DBEntity valueOf(final Cursor c) {
+	public DBEntity<Integer> valueOf(final Cursor c) {
 		
 		Employee e = new Employee();
 		

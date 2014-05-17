@@ -32,23 +32,28 @@
 
 package r2b.apps.db;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import r2b.apps.db.dao.EmployeeDao;
-import r2b.apps.db.dao.EmployeeDaoImpl;
-import r2b.apps.model.Employee;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 
-public class DBManager {
+/**
+ * 
+ * Database manager.
+ *
+ * @param <K> Key
+ */
+public class DBManager<K> {
 
-	private final SQLiteDatabase db;
+	/**
+	 * DB handler.
+	 */
 	private final DatabaseHandler handler;
-	
-	// XXX Add here your DAOs variables
-	private EmployeeDao employeeDao;
+	/**
+	 * Generic DAO.
+	 */
+	private GenericDao<DBEntity<K>, K> dao;
 	
 	/**
 	 * Builder.
@@ -57,45 +62,58 @@ public class DBManager {
 	public DBManager(final Context context) {
 		handler = DatabaseHandler.init(context.getApplicationContext());
 		
-		db = DatabaseHandler.getDatabase();
+		final SQLiteDatabase db = DatabaseHandler.getDatabase();
 		
-		// XXX Add here your DAOs instantiations
-		employeeDao = new EmployeeDaoImpl(db);
+		dao = new GenericDaoImpl<DBEntity<K>, K>(db);
 	}
 	
-	public DBEntity create(DBEntity e) {
-		if (e instanceof Employee) {
-			return employeeDao.create((Employee) e);	
-		}
-		return null;		
+	/**
+	 * Insert item on db.
+	 * @param e Item to insert.
+	 * @return Item with setted id.
+	 * @throws IllegalArgumentException, when item is null.
+	 */
+	public DBEntity<K> create(DBEntity<K> e) {
+		return (DBEntity<K>) dao.create(e);
 	}
 	
-	public DBEntity retrieve(final Integer id, final Class<? extends DBEntity> clazz) {
-		if (clazz.getSimpleName().equalsIgnoreCase(Employee.class.getSimpleName())) {
-			return employeeDao.retrieve(id, Employee.class);	
-		}
-		return null;
+    /**
+     * Get item with id.
+     * @param id Id of the item to get.
+     * @param clazz The class of the entity to retrieve.
+     * @return Item, null if is not stored.
+     * @throws IllegalArgumentException, id is null.
+     */
+	public DBEntity<K> retrieve(final K id, final Class<DBEntity<K>> clazz) {
+		return (DBEntity<K>) dao.retrieve(id, clazz);
 	}
 
-	public DBEntity update(DBEntity e) {
-		if (e instanceof Employee) {
-			return employeeDao.update((Employee) e);	
-		}
-		return null;		
+    /**
+     * Change the values of the item, except id, to new values.
+     * @param e Item to update with the new values.
+     * @return Item updated, null if is not stored.
+     * @throws IllegalArgumentException, item is null.
+     */
+	public DBEntity<K> update(DBEntity<K> e) {
+		return (DBEntity<K>) dao.update(e);		
 	}
     
-	public void delete(final DBEntity e) {
-		if (e instanceof Employee) {
-			employeeDao.delete((Employee) e);	
-		}
+    /**
+     * Delete the item if is stored.
+     * @param e The item to delete.
+     * @throws IllegalArgumentException, item is null.
+     */
+	public void delete(final DBEntity<K> e) {
+		dao.delete(e);
 	}
     
-	public List<DBEntity> listAll(final Class<? extends DBEntity> clazz) {
-		List<DBEntity> list = new ArrayList<>();		
-		if (clazz.getSimpleName().equalsIgnoreCase(Employee.class.getSimpleName())) {
-			list.addAll(employeeDao.listAll(Employee.class));	
-		}
-		return list;
+    /**
+     * List all elements.
+     * @param clazz The class of the entity to retrieve.
+     * @return List of items, or an empty list. Never null.
+     */
+	public List<DBEntity<K>> listAll(final Class<DBEntity<K>> clazz) {
+		return dao.listAll(clazz);
 	}
 	
 	/**

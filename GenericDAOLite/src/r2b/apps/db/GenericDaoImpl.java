@@ -37,7 +37,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import r2b.apps.db.dao.EmployeeDaoImpl;
 import r2b.apps.utils.Logger;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -51,8 +50,9 @@ import android.database.sqlite.SQLiteException;
  * @param <T extends DBEntity> Object
  * @param <K> Key
  */
-public abstract class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
+public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 	
+	// This values depends on DBEntity signature
 	private static final String VALUE_OF_METHOD = "valueOf";
 	private static final String GET_TABLE_NAME_METHOD = "getTableName";
 	
@@ -143,10 +143,10 @@ public abstract class GenericDaoImpl<T extends DBEntity, K> implements GenericDa
 					element = (T) obj;
 				}
 
-				Logger.i(EmployeeDaoImpl.class.getSimpleName(), "Retrieve element with id: " + String.valueOf(id));
+				Logger.i(GenericDaoImpl.class.getSimpleName(), "Retrieve element with id: " + String.valueOf(id));
 				
 			} else {
-				Logger.i(EmployeeDaoImpl.class.getSimpleName(), "There is no element with id: " + String.valueOf(id));
+				Logger.i(GenericDaoImpl.class.getSimpleName(), "There is no element with id: " + String.valueOf(id));
 			}
 			
 			c.close();
@@ -271,13 +271,13 @@ public abstract class GenericDaoImpl<T extends DBEntity, K> implements GenericDa
 					
 					elements.add(element);	
 					
-					Logger.i(EmployeeDaoImpl.class.getSimpleName(), 
+					Logger.i(GenericDaoImpl.class.getSimpleName(), 
 							"Retrieve element with id: " + String.valueOf(c.getInt(0)));	    		
 					
 				} while (c.moveToNext());
 				
 			} else {
-				Logger.i(EmployeeDaoImpl.class.getSimpleName(), "There are no elements.");
+				Logger.i(GenericDaoImpl.class.getSimpleName(), "There are no elements.");
 			}
 			
 			c.close();

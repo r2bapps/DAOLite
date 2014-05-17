@@ -37,8 +37,15 @@ package r2b.apps.utils;
  */
 public final class Cons {
 	
+	
 	public static final boolean DEBUG = true;
 	public static final boolean SHOW_LOGS = true;
 	public static final boolean FAKE_DATA = true;
+	
+	public static final class DB {
+		public static final String DATABASE_NAME = "r2b.apps.genericdaolite.db";
+		public static final int DATABASE_VERSION = 1;
+		public static final String COLD_ID = "id";
+	}
 
 }

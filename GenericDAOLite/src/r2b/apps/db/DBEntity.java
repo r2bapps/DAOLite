@@ -32,22 +32,24 @@
 
 package r2b.apps.db;
 
+import r2b.apps.utils.Cons;
 import android.content.ContentValues;
 import android.database.Cursor;
 
 /**
  * 
  * Database entity.
- *
+ * 
+ * @param <K> Key
  */
-public interface DBEntity {
+public interface DBEntity<K> {
 
-	public static final String COL_ID = "id";
+	public static final String COL_ID = Cons.DB.COLD_ID;
 	
 	public String getTableName();
 	public String getTableKey();
-	public void setTableKey(final Integer id);
+	public void setTableKey(final K id);
 	public ContentValues getTableContentValues();
-	public DBEntity valueOf(final Cursor c);
+	public DBEntity<K> valueOf(final Cursor c);
 	
 }
