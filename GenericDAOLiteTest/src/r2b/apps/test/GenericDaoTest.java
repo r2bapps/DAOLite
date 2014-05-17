@@ -28,8 +28,8 @@ public class GenericDaoTest extends AndroidTestCase {
 		int id = -1;
 		
 		e.setId(id);
-		e.setName("Roman");
-		e.setSurname("Rodriguez Balseiro");
+		e.setName("R");
+		e.setSurname("R B");
 		e.setActive(true);
 		
 		Employee aux = (Employee) dbManager.create(e);
