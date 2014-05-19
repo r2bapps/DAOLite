@@ -32,9 +32,15 @@
 
 package r2b.apps.db;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.Properties;
+
 import r2b.apps.utils.Cons;
 import r2b.apps.utils.Logger;
 import android.content.Context;
+import android.content.res.Resources.NotFoundException;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -62,17 +68,6 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	 * and then write. It will simply not write your change.
 	 */
 
-	// Tables
-	public static final String TABLE_EMPLOYEE = "Employee"; // TODO GET ENTITY NAME
-
-	
-	// Employee Columns
-	public static final String COL_EMPLOYEE_ID = Cons.DB.COLD_ID;
-	public static final String COL_EMPLOYEE_NAME = "name";
-	public static final String COL_EMPLOYEE_SURNAME = "surname";
-	public static final String COL_EMPLOYEE_ACTIVE = "active";
-
-
 	/**
 	 * Database version.
 	 */
@@ -89,15 +84,22 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	 * Database instance.
 	 */
 	private static SQLiteDatabase db;
+	/**
+	 * Creating string.
+	 */
+	private static StringBuilder strBuilder = new StringBuilder();
 	
 	/**
 	 * Inits the database.
 	 * @param context The application context.
+	 * @param propertiesRawResource The database creation properties file
 	 * @return The db handler.
 	 */
-	public synchronized static DatabaseHandler init(final Context context) {
+	public synchronized static DatabaseHandler init(final Context context, 
+			final int propertiesRawResource) {
 		if(instance == null) { 
 			instance = new DatabaseHandler(context);
+			load(context, propertiesRawResource);
 		}
 		return instance;
 	}
@@ -107,19 +109,8 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	 * @return The database on writable mode.
 	 */
 	public synchronized static SQLiteDatabase getDatabase() {
-		if (db == null || db.isReadOnly()) {
+		if (db == null) {
 			db = instance.getWritableDatabase();
-		}
-		return db;
-	}
-
-	/**
-	 * Singleton method.
-	 * @return The database on readable mode.
-	 */
-	public synchronized static SQLiteDatabase getDatabaseReadOnly() {
-		if (db == null || !db.isReadOnly()) {
-			db = instance.getReadableDatabase();
 		}
 		return db;
 	}
@@ -137,32 +128,12 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	 */
 	@Override
 	public void onCreate(final SQLiteDatabase db) {
-		Logger.i(DatabaseHandler.class.getSimpleName(), "onCreate");
-		
-		final StringBuffer employeeCreateArgs = new StringBuffer();			
-		employeeCreateArgs
-			.append("(" + COL_EMPLOYEE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,") // Incremental local id
-			.append(COL_EMPLOYEE_NAME + " TEXT,");
-		employeeCreateArgs
-			.append(COL_EMPLOYEE_SURNAME + " TEXT,")
-			.append(COL_EMPLOYEE_ACTIVE + " INTEGER)"); // BOOLEAN in 0 (false) and 1 (true)
-			
+		Logger.i(DatabaseHandler.class.getSimpleName(), "onCreate");		
 		
 		try {
 			
-			db.execSQL("CREATE TABLE " + TABLE_EMPLOYEE + employeeCreateArgs);
-			
-			
-			// Indexes for most searched
-			db.execSQL("CREATE INDEX " + TABLE_EMPLOYEE + "_" + COL_EMPLOYEE_NAME + "_" +"index"  
-					+ " ON " + TABLE_EMPLOYEE + "(" + COL_EMPLOYEE_NAME + ")");
-			
-			
-			// Show log info
-			Logger.i(DatabaseHandler.class.getSimpleName(), "CREATE TABLE " + TABLE_EMPLOYEE + employeeCreateArgs);
-			Logger.i(DatabaseHandler.class.getSimpleName(), "CREATE INDEX " + TABLE_EMPLOYEE + "_" + COL_EMPLOYEE_NAME + "_" +"index"  
-					+ " ON " + TABLE_EMPLOYEE + "(" + COL_EMPLOYEE_NAME + ")");
-			
+			db.execSQL(strBuilder.toString());	
+			strBuilder = null;
 
 		} catch (SQLException e) {
 			Logger.e(DatabaseHandler.class.getSimpleName(), "Can't create database", e);
@@ -171,37 +142,14 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 		
 	}
 
-
 	/* (non-Javadoc)
 	 * @see android.database.sqlite.SQLiteOpenHelper#onUpgrade(android.database.sqlite.SQLiteDatabase, int, int)
 	 */
 	@Override
-	public void onUpgrade(final SQLiteDatabase db, int oldVersion, int newVersion) {
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		Logger.i(DatabaseHandler.class.getSimpleName(), "onUpgrade");
-		
-		// Drop older table and index if existed
-		try {
-
-			db.execSQL("DROP TABLE IF EXISTS " + TABLE_EMPLOYEE);
-			
-			db.execSQL("DROP INDEX IF EXISTS " + TABLE_EMPLOYEE + "_" + COL_EMPLOYEE_NAME + "_" +"index");			
-			
-			// Show log info
-			Logger.i(DatabaseHandler.class.getSimpleName(), "DROP TABLE IF EXISTS " + TABLE_EMPLOYEE);
-			
-			Logger.i(DatabaseHandler.class.getSimpleName(), 
-					"DROP INDEX IF EXISTS " + TABLE_EMPLOYEE + "_" + COL_EMPLOYEE_NAME + "_" +"index");			
-			
-			
-			// Create tables and indexes again
-			onCreate(db);
-		} catch (SQLException e) {
-			Logger.e(DatabaseHandler.class.getSimpleName(), "Can't drop database", e);
-			throw new RuntimeException(e);
-		}
-		
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see android.database.sqlite.SQLiteOpenHelper#close()
 	 */
@@ -209,14 +157,89 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	public synchronized void close() {
 		if (db != null) {
 			db.close();
+			instance.close();			
 		}
 	}
 	
 	/**
-	 * Clear all db data.
+	 * Read from the /res/raw directory
+	 * @param context
+	 * @param propertiesRawResource
 	 */
-	public synchronized void clear() {
-		onUpgrade(db, DATABASE_VERSION, DATABASE_VERSION-1);
+	private static void load(final Context context, final int propertiesRawResource) {	
+		try {
+		    InputStream rawResource = context.getResources().openRawResource(propertiesRawResource);
+		    Properties properties = new Properties();
+		    properties.load(rawResource);
+		    create(properties);
+		} catch (NotFoundException | IOException e) {
+			Logger.e(DatabaseHandler.class.getSimpleName(), "Can't read database properties", e);
+			throw new RuntimeException(e);
+		}
 	}
+	
+	private static void create(final Properties properties) {
+		final Enumeration<Object> e = properties.elements();
+
+	    while (e.hasMoreElements()) {
+	      String key = (String) e.nextElement();
+	      String value = properties.getProperty(key);
+	      
+	      String tablename = getTableName(key.trim());
+	      String [] index = getCreateIndex(value.trim());
+	      
+	      
+	      strBuilder
+	      	.append("CREATE TABLE ")
+	      	.append(tablename);
+	      strBuilder
+	      	.append(" ")
+	      	.append(getCreateArgs(value))
+	      	.append(";");	      
+	      
+	      
+	      if(index != null) {
+	    	  for(int i = 0; i < index.length; i++) {
+	    		  strBuilder
+		    		  .append("CREATE INDEX ")
+		    		  .append(tablename);
+	    		  strBuilder
+		    		  .append("_")
+		    		  .append(index[i].trim());
+	    		  strBuilder
+		    		  .append("_index")
+		    		  .append(" ON ");
+	    		  strBuilder
+		    		  .append(tablename)
+		    		  .append("( ");
+	    		  strBuilder
+		    		  .append(index[i].trim())
+		    		  .append(" );");
+	    	  }
+	      }
+	      
+	    }
+	    
+	}	
+	
+	private static String getTableName(final String key) {	
+        int pos = key.lastIndexOf(".");
+        if (pos == -1) return key;
+        return key.substring(0, pos);
+	}
+	
+	private static String getCreateArgs(final String value) {
+		return value.split(";")[0].trim();
+	}
+	
+	private static String[] getCreateIndex(final String value) {
+		if (value.split(";").length > 0) {
+			String args = value.split(";")[1].trim();
+			return args.split(",");			
+		}
+		return null;
+	}
+
+
 	
 }

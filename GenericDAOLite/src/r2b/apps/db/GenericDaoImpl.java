@@ -50,6 +50,7 @@ import android.database.sqlite.SQLiteException;
  * @param <T extends DBEntity> Object
  * @param <K> Key
  */
+@SuppressWarnings("rawtypes")
 public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 	
 	// This values depends on DBEntity signature
@@ -69,6 +70,7 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 		this.db = db;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public T create(T t) throws IllegalArgumentException {
 		
@@ -162,6 +164,7 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public T update(T t) throws IllegalArgumentException {
 		

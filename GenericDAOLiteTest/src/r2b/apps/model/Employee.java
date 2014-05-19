@@ -33,7 +33,6 @@
 package r2b.apps.model;
 
 import r2b.apps.db.DBEntity;
-import r2b.apps.db.DatabaseHandler;
 import android.content.ContentValues;
 import android.database.Cursor;
 
@@ -48,18 +47,23 @@ public class Employee implements DBEntity<Integer> {
 	
 	@Override
 	public String getTableName() {
-		return DatabaseHandler.TABLE_EMPLOYEE;
+		return Employee.class.getSimpleName();
 	}
 
 	@Override
 	public ContentValues getTableContentValues() {
 		ContentValues values = new ContentValues();	
 		
-		values.put(DatabaseHandler.COL_EMPLOYEE_ID, DBEntity.COL_ID);
-	    values.put(DatabaseHandler.COL_EMPLOYEE_NAME, name);
-	    values.put(DatabaseHandler.COL_EMPLOYEE_SURNAME, surname);
+		values.put(COL_ID, id);
+	    values.put("name", name);
+	    values.put("surname", surname);
 	    // BOOLEAN in 0 (false) and 1 (true)
-	    values.put(DatabaseHandler.COL_EMPLOYEE_ACTIVE, active ? 1 : 0);
+	    if (active) {
+	    	values.put("active", 1);	
+	    }
+	    else {
+	    	values.put("active", 0);
+	    }
 	    
 	    return values;
 	}
@@ -82,11 +86,11 @@ public class Employee implements DBEntity<Integer> {
 			throw new IllegalArgumentException("Cursor argument is null");
 		}
 		
-		e.id = Integer.valueOf(c.getInt(c.getColumnIndex(DatabaseHandler.COL_EMPLOYEE_ID)));		
-	    e.name= c.getString(c.getColumnIndex(DatabaseHandler.COL_EMPLOYEE_NAME));	    
-	    e.surname = c.getString(c.getColumnIndex(DatabaseHandler.COL_EMPLOYEE_SURNAME));
+		e.id = Integer.valueOf(c.getInt(c.getColumnIndex(COL_ID)));		
+	    e.name= c.getString(c.getColumnIndex("name"));	    
+	    e.surname = c.getString(c.getColumnIndex("surname"));
 	    // BOOLEAN in 0 (false) and 1 (true)
-	    e.active = c.getInt(c.getColumnIndex(DatabaseHandler.COL_EMPLOYEE_ACTIVE)) == 0 ? false : true;
+	    e.active = c.getInt(c.getColumnIndex("active")) == 0 ? false : true;
 	    
 	    return e;
 	    

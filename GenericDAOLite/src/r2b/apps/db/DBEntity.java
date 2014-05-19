@@ -32,7 +32,6 @@
 
 package r2b.apps.db;
 
-import r2b.apps.utils.Cons;
 import android.content.ContentValues;
 import android.database.Cursor;
 
@@ -44,7 +43,7 @@ import android.database.Cursor;
  */
 public interface DBEntity<K> {
 
-	public static final String COL_ID = Cons.DB.COLD_ID;
+	public static final String COL_ID = "id";
 	
 	public String getTableName();
 	public String getTableKey();

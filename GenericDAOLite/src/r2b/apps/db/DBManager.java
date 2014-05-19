@@ -58,9 +58,10 @@ public class DBManager<K> {
 	/**
 	 * Builder.
 	 * @param context The application context.
+	 * @param propertiesRawResource The database creation properties file
 	 */
-	public DBManager(final Context context) {
-		handler = DatabaseHandler.init(context.getApplicationContext());
+	public DBManager(final Context context, final int propertiesRawResource) {
+		handler = DatabaseHandler.init(context.getApplicationContext(), propertiesRawResource);
 		
 		final SQLiteDatabase db = DatabaseHandler.getDatabase();
 		
@@ -114,13 +115,6 @@ public class DBManager<K> {
      */
 	public List<DBEntity<K>> listAll(final Class<DBEntity<K>> clazz) {
 		return dao.listAll(clazz);
-	}
-	
-	/**
-	 * Clear all db data.
-	 */
-	public void clear() {
-		handler.clear();
 	}
 	
 	/**
