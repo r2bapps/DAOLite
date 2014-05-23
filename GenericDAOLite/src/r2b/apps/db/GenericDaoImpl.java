@@ -32,8 +32,6 @@
 
 package r2b.apps.db;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,11 +49,7 @@ import android.database.sqlite.SQLiteException;
  * @param <K> Key
  */
 @SuppressWarnings("rawtypes")
-public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
-	
-	// This values depends on DBEntity signature
-	private static final String VALUE_OF_METHOD = "valueOf";
-	private static final String GET_TABLE_NAME_METHOD = "getTableName";
+public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K> {
 	
 	/**
 	 * Database instance.
@@ -94,7 +88,7 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 	    if(exit == -1) {
 	    	throw new SQLiteException("Can not create element: \n" + t.toString() + "\n, exit code -1");
 	    } else {	    	
-	    	((DBEntity)t).setTableKey(exit);    		    	
+	    	((DBEntity)t).setKey(exit);    		    	
 	    	Logger.i(GenericDaoImpl.class.getSimpleName(), "Element created: \n" + t.toString());	    	
 	    }
 	    
@@ -115,10 +109,8 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 		try {
 			String tableName = null;
 			{
-				Object obj = null;
-				Method method = clazz.getMethod(GET_TABLE_NAME_METHOD);
-				method.invoke(obj);
-				tableName = (String) obj;
+				Object obj = clazz.newInstance();
+				tableName = ((DBEntity) obj).getTableName();
 			}
 			
 			T element = null;
@@ -139,10 +131,8 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 			if (c.moveToFirst()) {
 				
 				{
-					Object obj = null;
-					Method method = clazz.getMethod(VALUE_OF_METHOD, Cursor.class);
-					method.invoke(obj, new Object[] { c });
-					element = (T) obj;
+					Object obj = clazz.newInstance();
+					element = (T) ((DBEntity) obj).valueOf(c);
 				}
 
 				Logger.i(GenericDaoImpl.class.getSimpleName(), "Retrieve element with id: " + String.valueOf(id));
@@ -155,11 +145,10 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 			
 			return element;
 			
-		} catch (NoSuchMethodException | 
-				IllegalAccessException | 
+		} catch (IllegalAccessException | 
 				IllegalArgumentException | 
-				InvocationTargetException | 
-				ClassCastException e) {
+				ClassCastException | 
+				InstantiationException e) {
 			throw new IllegalStateException(e.toString());
 		}
 	}
@@ -171,7 +160,7 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 		if(t == null) {
 			throw new IllegalArgumentException("T argument is null");
 		}
-		else if(t.getTableKey() == null) {
+		else if(t.getKey() == null) {
 			throw new IllegalArgumentException("T table key is null");
 		}
 		else if(t.getTableName() == null) {
@@ -189,13 +178,13 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 
 		// Which row to update, based on the ID
 		final String selection = DBEntity.COL_ID + " LIKE ?";
-		final String[] selectionArgs = { t.getTableKey() };
+		final String[] selectionArgs = { t.getKey().toString() };
 		
 		// Return: the number of rows affected. Should be 1
 		int exit = (int) db.update(t.getTableName(), values, selection, selectionArgs);
 	    
 	    if(exit == 1) {
-	    	((DBEntity)updated).setTableKey(exit);    		    	
+	    	((DBEntity)updated).setKey(exit);    		    	
 	    	Logger.i(GenericDaoImpl.class.getSimpleName(), "Element updated: \n" + t.toString());
 	    } else {	    	
 	    	Logger.e(GenericDaoImpl.class.getSimpleName(),
@@ -212,13 +201,13 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 		if(t == null) {
 			throw new IllegalArgumentException("T argument is null");
 		}
-		else if(t.getTableKey() == null) {
+		else if(t.getKey() == null) {
 			throw new IllegalArgumentException("T table key is null");
 		}
 		
 		// Which row to delete, based on the ID
 		String selection = DBEntity.COL_ID + " LIKE ?";
-		String[] selectionArgs = { t.getTableKey() };
+		String[] selectionArgs = { t.getKey().toString() };
 		
 		// Return: the number of rows affected. Should be 1
 		int exit = db.delete(t.getTableName(), selection, selectionArgs);
@@ -243,10 +232,8 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 		try {
 			String tableName = null;
 			{
-				Object obj = null;
-				Method method = clazz.getMethod(GET_TABLE_NAME_METHOD);
-				method.invoke(obj);
-				tableName = (String) obj;
+				Object obj = clazz.newInstance();
+				tableName = ((DBEntity) obj).getTableName();
 			}
 			
 			List<T> elements = new ArrayList<T>();
@@ -266,10 +253,8 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 					
 					T element;
 					{
-						Object obj = null;
-						Method method = clazz.getMethod(VALUE_OF_METHOD, Cursor.class);
-						method.invoke(obj, new Object[] { c });
-						element = (T) obj;	
+						Object obj = clazz.newInstance();
+						element = (T) ((DBEntity) obj).valueOf(c);
 					}
 					
 					elements.add(element);	
@@ -287,11 +272,10 @@ public class GenericDaoImpl<T extends DBEntity, K> implements GenericDao<T, K> {
 			
 			return elements;
 			
-		} catch (NoSuchMethodException | 
-				IllegalAccessException | 
+		} catch (IllegalAccessException | 
 				IllegalArgumentException | 
-				InvocationTargetException | 
-				ClassCastException e) {
+				ClassCastException | 
+				InstantiationException e) {
 			throw new IllegalStateException(e.toString());
 		}
 	}

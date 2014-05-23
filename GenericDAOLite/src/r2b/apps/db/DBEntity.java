@@ -46,8 +46,8 @@ public interface DBEntity<K> {
 	public static final String COL_ID = "id";
 	
 	public String getTableName();
-	public String getTableKey();
-	public void setTableKey(final K id);
+	public K getKey();
+	public void setKey(final K id);
 	public ContentValues getTableContentValues();
 	public DBEntity<K> valueOf(final Cursor c);
 	

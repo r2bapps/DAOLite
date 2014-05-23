@@ -20,7 +20,7 @@
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
  * 
- * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+ * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY ObjectIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
@@ -41,7 +41,7 @@ import android.database.sqlite.SQLiteDatabase;
 /**
  * 
  * Database manager.
- *
+ * 
  * @param <K> Key
  */
 public class DBManager<K> {
@@ -58,10 +58,9 @@ public class DBManager<K> {
 	/**
 	 * Builder.
 	 * @param context The application context.
-	 * @param propertiesRawResource The database creation properties file
 	 */
-	public DBManager(final Context context, final int propertiesRawResource) {
-		handler = DatabaseHandler.init(context.getApplicationContext(), propertiesRawResource);
+	public DBManager(final Context context) {
+		handler = DatabaseHandler.init(context.getApplicationContext());
 		
 		final SQLiteDatabase db = DatabaseHandler.getDatabase();
 		
@@ -85,8 +84,9 @@ public class DBManager<K> {
      * @return Item, null if is not stored.
      * @throws IllegalArgumentException, id is null.
      */
-	public DBEntity<K> retrieve(final K id, final Class<DBEntity<K>> clazz) {
-		return (DBEntity<K>) dao.retrieve(id, clazz);
+	@SuppressWarnings("unchecked")
+	public DBEntity<K> retrieve(final K id, final Class<? extends DBEntity<K>> clazz) {
+		return (DBEntity<K>) dao.retrieve(id, (Class<DBEntity<K>>) clazz);
 	}
 
     /**
@@ -113,8 +113,9 @@ public class DBManager<K> {
      * @param clazz The class of the entity to retrieve.
      * @return List of items, or an empty list. Never null.
      */
-	public List<DBEntity<K>> listAll(final Class<DBEntity<K>> clazz) {
-		return dao.listAll(clazz);
+	@SuppressWarnings("unchecked")
+	public List<DBEntity<K>> listAll(final Class<? extends DBEntity<K>> clazz) {
+		return dao.listAll((Class<DBEntity<K>>) clazz);
 	}
 	
 	/**

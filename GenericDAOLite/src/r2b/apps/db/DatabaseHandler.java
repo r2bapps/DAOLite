@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import r2b.apps.R;
 import r2b.apps.utils.Cons;
 import r2b.apps.utils.Logger;
 import android.content.Context;
@@ -46,6 +47,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 
+/**
+ * NOTE: Foreign key constraints with on delete cascade are supported.
+ * It only works since Android 2.2 Froyo which has SQLite 3.6.22
+ */
 public final class DatabaseHandler extends SQLiteOpenHelper {
 
 	/*
@@ -85,21 +90,31 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	 */
 	private static SQLiteDatabase db;
 	/**
-	 * Creating string.
+	 * Application context.
 	 */
-	private static StringBuilder strBuilder = new StringBuilder();
+	private static Context mContext;
 	
 	/**
-	 * Inits the database.
+	 * Init the database.
+	 * 
+	 * WARNING: On Cons.CLEAR_DB_ON_START = true, deletes db file on each start.
+	 * 
 	 * @param context The application context.
-	 * @param propertiesRawResource The database creation properties file
 	 * @return The db handler.
 	 */
-	public synchronized static DatabaseHandler init(final Context context, 
-			final int propertiesRawResource) {
+	public synchronized static DatabaseHandler init(final Context context) {
 		if(instance == null) { 
+			
+			if(Cons.DB.CLEAR_DB_ON_START) {
+				boolean exit = context.deleteDatabase(DATABASE_NAME);
+				if(!exit) {
+					Logger.e(DatabaseHandler.class.getSimpleName(), "Can't delete database on startup");
+					throw new RuntimeException("Can't delete database on startup");
+				}
+			}
+			
 			instance = new DatabaseHandler(context);
-			load(context, propertiesRawResource);
+			mContext = context.getApplicationContext();
 		}
 		return instance;
 	}
@@ -132,12 +147,31 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 		
 		try {
 			
-			db.execSQL(strBuilder.toString());	
-			strBuilder = null;
+			db.beginTransaction();
+
+			StringBuilder strBuilder = new StringBuilder();
+			
+			strBuilder = loadTable(strBuilder, R.raw.create_table);			
+			if(strBuilder != null) {
+				db.execSQL(strBuilder.toString());
+				
+				strBuilder.setLength(0);
+				
+				strBuilder = loadIndex(strBuilder, R.raw.create_index);
+				if(strBuilder != null) {
+					db.execSQL(strBuilder.toString());	
+				}
+			}
+		
+			
+			db.setTransactionSuccessful();									
 
 		} catch (SQLException e) {
 			Logger.e(DatabaseHandler.class.getSimpleName(), "Can't create database", e);
 			throw new RuntimeException(e);
+		} finally {
+			mContext = null;
+			db.endTransaction();
 		}
 		
 	}
@@ -151,95 +185,164 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	}
 	
 	/* (non-Javadoc)
+	 * @see android.database.sqlite.SQLiteOpenHelper#onOpen(android.database.sqlite.SQLiteDatabase)
+	 */
+	@Override
+	public void onOpen(SQLiteDatabase db) {
+	    super.onOpen(db);
+	    if (!db.isReadOnly()) {
+	        // Enable foreign key constraints
+	        db.execSQL("PRAGMA foreign_keys=ON;");
+	    }
+	}
+	
+	/* (non-Javadoc)
 	 * @see android.database.sqlite.SQLiteOpenHelper#close()
 	 */
 	@Override
 	public synchronized void close() {
 		if (db != null) {
 			db.close();
-			instance.close();			
+			instance.close();
+			db = null;
+			instance = null;
 		}
 	}
 	
 	/**
 	 * Read from the /res/raw directory
-	 * @param context
-	 * @param propertiesRawResource
+	 * @param propertiesFileResId
+	 * @return
 	 */
-	private static void load(final Context context, final int propertiesRawResource) {	
+	private Properties loadProperties(final int propertiesFileResId) {	
 		try {
-		    InputStream rawResource = context.getResources().openRawResource(propertiesRawResource);
+		    InputStream rawResource = mContext.getResources().openRawResource(propertiesFileResId);
 		    Properties properties = new Properties();
 		    properties.load(rawResource);
-		    create(properties);
+		    return properties;
 		} catch (NotFoundException | IOException e) {
 			Logger.e(DatabaseHandler.class.getSimpleName(), "Can't read database properties", e);
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private static void create(final Properties properties) {
-		final Enumeration<Object> e = properties.elements();
+	/**
+	 * Read from the /res/raw directory table info
+	 * @param stringBuilder
+	 * @param propertiesFileResId
+	 * @return
+	 */
+	private StringBuilder loadTable(StringBuilder stringBuilder, final int propertiesFileResId) {	
+	    Properties properties = loadProperties(propertiesFileResId);
+	    stringBuilder = createTable(stringBuilder, properties);
+	    return stringBuilder;
+	}
+	
+	/**
+	 * Read from the /res/raw directory index info
+	 * @param stringBuilder
+	 * @param propertiesFileResId
+	 * @return
+	 */
+	private StringBuilder loadIndex(StringBuilder stringBuilder, final int propertiesFileResId) {	
+	    Properties properties = loadProperties(propertiesFileResId);
+	    stringBuilder = createIndex(stringBuilder, properties);
+	    return stringBuilder;
+	}
+	
+	/**
+	 * Build create table query.
+	 * @param strBuilder
+	 * @param properties
+	 * @return
+	 */
+	private StringBuilder createTable(StringBuilder strBuilder, final Properties properties) {
+		
+		if(properties == null) {
+			return null;
+		}
+		
+		final Enumeration<Object> e = properties.keys();
+
+	    while (e.hasMoreElements()) {
+	      String key = (String) e.nextElement();
+	      String value = properties.getProperty(key);
+	      	      
+	      strBuilder
+	      	.append("CREATE TABLE ")
+	      	.append(key.trim());
+	      strBuilder
+	      	.append(" ( ")
+	      	.append(value)
+	      	.append(" );");	      	      	    	      
+	    }
+	    
+	    return strBuilder;
+	    
+	}	
+	
+	/**
+	 * Build create index query.
+	 * @param strBuilder
+	 * @param properties
+	 * @return
+	 */
+	private StringBuilder createIndex(StringBuilder strBuilder, final Properties properties) {
+		
+		if(properties == null) {
+			return null;
+		}
+		
+		final Enumeration<Object> e = properties.keys();
 
 	    while (e.hasMoreElements()) {
 	      String key = (String) e.nextElement();
 	      String value = properties.getProperty(key);
 	      
-	      String tablename = getTableName(key.trim());
-	      String [] index = getCreateIndex(value.trim());
-	      
-	      
-	      strBuilder
-	      	.append("CREATE TABLE ")
-	      	.append(tablename);
-	      strBuilder
-	      	.append(" ")
-	      	.append(getCreateArgs(value))
-	      	.append(";");	      
-	      
+	      String [] index = getIndex(value.trim());     	      
 	      
 	      if(index != null) {
 	    	  for(int i = 0; i < index.length; i++) {
-	    		  strBuilder
-		    		  .append("CREATE INDEX ")
-		    		  .append(tablename);
-	    		  strBuilder
-		    		  .append("_")
-		    		  .append(index[i].trim());
-	    		  strBuilder
-		    		  .append("_index")
-		    		  .append(" ON ");
-	    		  strBuilder
-		    		  .append(tablename)
-		    		  .append("( ");
-	    		  strBuilder
-		    		  .append(index[i].trim())
-		    		  .append(" );");
+	    		  
+	    		  if(index[i] != null && !"".equals(index[i])) {
+		    		  strBuilder
+			    		  .append("CREATE INDEX ")
+			    		  .append(key.trim());
+		    		  strBuilder
+			    		  .append("_")
+			    		  .append(index[i].trim());
+		    		  strBuilder
+			    		  .append("_index")
+			    		  .append(" ON ");
+		    		  strBuilder
+			    		  .append(key.trim())
+			    		  .append("( ");
+		    		  strBuilder
+			    		  .append(index[i].trim())
+			    		  .append(" );");
+	    		  }
+	    		  
 	    	  }
 	      }
 	      
 	    }
 	    
-	}	
-	
-	private static String getTableName(final String key) {	
-        int pos = key.lastIndexOf(".");
-        if (pos == -1) return key;
-        return key.substring(0, pos);
+	    return strBuilder;
+	    
 	}
 	
-	private static String getCreateArgs(final String value) {
-		return value.split(";")[0].trim();
-	}
-	
-	private static String[] getCreateIndex(final String value) {
-		if (value.split(";").length > 0) {
-			String args = value.split(";")[1].trim();
-			return args.split(",");			
+	/**
+	 * Split index
+	 * @param value
+	 * @return
+	 */
+	private String[] getIndex(final String value) {
+		if (value.split(",").length > 0) {
+			String[] args = value.split(",");
+			return args;			
 		}
 		return null;
 	}
-
-
+		
 	
 }

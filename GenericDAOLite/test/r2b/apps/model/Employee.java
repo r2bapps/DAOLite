@@ -69,12 +69,12 @@ public class Employee implements DBEntity<Integer> {
 	}
 	
 	@Override
-	public String getTableKey() {
-		return id.toString();
+	public Integer getKey() {
+		return id;
 	}
 
 	@Override
-	public void setTableKey(final Integer id) {
+	public void setKey(final Integer id) {
 		this.id = id;
 	}
 	
@@ -98,6 +98,10 @@ public class Employee implements DBEntity<Integer> {
 	
 	/* End DBEntity implementation */
 	
+	/**
+	 * Builder.
+	 * Compulsory.
+	 */
 	public Employee() {
 		super();
 	}
