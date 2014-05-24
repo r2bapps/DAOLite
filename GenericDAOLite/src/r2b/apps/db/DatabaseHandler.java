@@ -32,8 +32,10 @@
 
 package r2b.apps.db;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -42,6 +44,7 @@ import r2b.apps.utils.Cons;
 import r2b.apps.utils.Logger;
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -106,11 +109,17 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 		if(instance == null) { 
 			
 			if(Cons.DB.CLEAR_DB_ON_START) {
-				boolean exit = context.deleteDatabase(DATABASE_NAME);
-				if(!exit) {
-					Logger.e(DatabaseHandler.class.getSimpleName(), "Can't delete database on startup");
-					throw new RuntimeException("Can't delete database on startup");
-				}
+				final File dbFile = context.getDatabasePath(DATABASE_NAME);
+			    if(dbFile != null && dbFile.exists()) {
+					boolean exit = context.deleteDatabase(DATABASE_NAME);
+					if(exit && Cons.DEBUG) {
+						Logger.i(DatabaseHandler.class.getSimpleName(), "Delete database on startup");
+					}
+					if(!exit) {
+						Logger.e(DatabaseHandler.class.getSimpleName(), "Can't delete database on startup");
+						throw new RuntimeException("Can't delete database on startup");						
+					}
+			    }
 			}
 			
 			instance = new DatabaseHandler(context);
@@ -149,18 +158,32 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 			
 			db.beginTransaction();
 
-			StringBuilder strBuilder = new StringBuilder();
+			/**
+			 * Is not possible executing multiple statements with SQLiteDatabase.execSQL
+			 */
 			
-			strBuilder = loadTable(strBuilder, R.raw.create_table);			
-			if(strBuilder != null) {
-				db.execSQL(strBuilder.toString());
-				
-				strBuilder.setLength(0);
-				
-				strBuilder = loadIndex(strBuilder, R.raw.create_index);
-				if(strBuilder != null) {
-					db.execSQL(strBuilder.toString());	
+		    Properties properties = loadProperties(R.raw.create_table);
+		    StringBuilder[] tables = new StringBuilder[properties.size()];
+		    tables = createTable(tables, properties);
+			
+			if(tables != null) {
+				for(StringBuilder item : tables) {
+					db.execSQL(item.toString());
+					item.setLength(0);
 				}
+								
+				
+			    properties = loadProperties(R.raw.create_index);
+			    ArrayList<StringBuilder> index = new ArrayList<StringBuilder>(properties.size());
+			    index = createIndex(index, properties);
+				if(index != null) {
+					for(StringBuilder item : index) {
+						db.execSQL(item.toString());
+						item.setLength(0);
+					}	
+					index.clear();
+				}				
+				
 			}
 		
 			
@@ -169,9 +192,33 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 		} catch (SQLException e) {
 			Logger.e(DatabaseHandler.class.getSimpleName(), "Can't create database", e);
 			throw new RuntimeException(e);
-		} finally {
+		} finally {						
 			mContext = null;
 			db.endTransaction();
+			
+			if(Cons.DEBUG) {
+				
+				String query = "SELECT name FROM sqlite_master WHERE type = 'table';";
+				Cursor c = db.rawQuery(query, null);
+				if (c != null && c.moveToFirst()) {
+					do {		
+						Logger.i(DatabaseHandler.class.getSimpleName(), 
+								"Created database table: " + String.valueOf(c.getString(0)));	    							
+					} while (c.moveToNext());
+				}
+				
+				
+				query = "SELECT name FROM sqlite_master WHERE type = 'index';";
+				c = db.rawQuery(query, null);
+				if (c != null && c.moveToFirst()) {
+					do {		
+						Logger.i(DatabaseHandler.class.getSimpleName(), 
+								"Created database indexes: " + String.valueOf(c.getString(0)));	    							
+					} while (c.moveToNext());
+				}
+				
+			}
+			
 		}
 		
 	}
@@ -227,57 +274,38 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * Read from the /res/raw directory table info
-	 * @param stringBuilder
-	 * @param propertiesFileResId
-	 * @return
-	 */
-	private StringBuilder loadTable(StringBuilder stringBuilder, final int propertiesFileResId) {	
-	    Properties properties = loadProperties(propertiesFileResId);
-	    stringBuilder = createTable(stringBuilder, properties);
-	    return stringBuilder;
-	}
-	
-	/**
-	 * Read from the /res/raw directory index info
-	 * @param stringBuilder
-	 * @param propertiesFileResId
-	 * @return
-	 */
-	private StringBuilder loadIndex(StringBuilder stringBuilder, final int propertiesFileResId) {	
-	    Properties properties = loadProperties(propertiesFileResId);
-	    stringBuilder = createIndex(stringBuilder, properties);
-	    return stringBuilder;
-	}
-	
-	/**
 	 * Build create table query.
-	 * @param strBuilder
+	 * @param tables
 	 * @param properties
 	 * @return
 	 */
-	private StringBuilder createTable(StringBuilder strBuilder, final Properties properties) {
+	private StringBuilder[] createTable(StringBuilder[] tables, final Properties properties) {
 		
 		if(properties == null) {
 			return null;
 		}
 		
 		final Enumeration<Object> e = properties.keys();
-
+		int i = 0;
+		
 	    while (e.hasMoreElements()) {
 	      String key = (String) e.nextElement();
 	      String value = properties.getProperty(key);
+	      
+	      tables[i] = new StringBuilder();
 	      	      
-	      strBuilder
+	      tables[i]
 	      	.append("CREATE TABLE ")
 	      	.append(key.trim());
-	      strBuilder
+	      tables[i]
 	      	.append(" ( ")
 	      	.append(value)
-	      	.append(" );");	      	      	    	      
+	      	.append(" );");	  
+	      
+	      i++;
 	    }
 	    
-	    return strBuilder;
+	    return tables;
 	    
 	}	
 	
@@ -287,43 +315,47 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	 * @param properties
 	 * @return
 	 */
-	private StringBuilder createIndex(StringBuilder strBuilder, final Properties properties) {
+	private ArrayList<StringBuilder> createIndex(ArrayList<StringBuilder> strBuilder, final Properties properties) {
 		
 		if(properties == null) {
 			return null;
 		}
 		
 		final Enumeration<Object> e = properties.keys();
-
 	    while (e.hasMoreElements()) {
-	      String key = (String) e.nextElement();
-	      String value = properties.getProperty(key);
+	    	String key = (String) e.nextElement();
+	    	String value = properties.getProperty(key);
 	      
-	      String [] index = getIndex(value.trim());     	      
-	      
-	      if(index != null) {
-	    	  for(int i = 0; i < index.length; i++) {
-	    		  
-	    		  if(index[i] != null && !"".equals(index[i])) {
-		    		  strBuilder
-			    		  .append("CREATE INDEX ")
-			    		  .append(key.trim());
-		    		  strBuilder
-			    		  .append("_")
-			    		  .append(index[i].trim());
-		    		  strBuilder
-			    		  .append("_index")
-			    		  .append(" ON ");
-		    		  strBuilder
-			    		  .append(key.trim())
-			    		  .append("( ");
-		    		  strBuilder
-			    		  .append(index[i].trim())
-			    		  .append(" );");
-	    		  }
-	    		  
-	    	  }
-	      }
+		      String [] index = getIndex(value.trim());     	      
+		      
+		      if(index != null) {
+		    	  for(int i = 0; i < index.length; i++) {
+		    		  
+		    		  if(index[i] != null && !"".equals(index[i])) {
+		    			  
+		    			  StringBuilder builder = new StringBuilder();
+		    			  
+		    			  builder
+				    		  .append("CREATE INDEX ")
+				    		  .append(key.trim());
+			    		  builder
+				    		  .append("_")
+				    		  .append(index[i].trim());
+			    		  builder
+				    		  .append("_index")
+				    		  .append(" ON ");
+			    		  builder
+				    		  .append(key.trim())
+				    		  .append("( ");
+			    		  builder
+				    		  .append(index[i].trim())
+				    		  .append(" );");
+			    		  
+			    		  strBuilder.add(builder);
+		    		  }
+		    		  
+		    	  }
+		      }
 	      
 	    }
 	    

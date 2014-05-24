@@ -9,7 +9,7 @@ Description
 ===========
 You can use for your Android projects ORMLite, GreenDAO or another ORM. You 
 can make your own DAOs or your SQL queries.
-If you do not need the powerful of an ORM and you don have time to waste 
+If you do not need the powerful of an ORM and you have no time to waste 
 creating your own DAOs, this is your solution.
 
 In all the projects we have worked required at least this level of development. 

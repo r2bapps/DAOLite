@@ -20,7 +20,7 @@
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
  * 
- * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY ObjectIND,
+ * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
@@ -46,6 +46,10 @@ import android.database.sqlite.SQLiteDatabase;
  */
 public class DBManager<K> {
 
+	public static enum ORDER_BY {
+		ASC, DESC
+	};
+	
 	/**
 	 * DB handler.
 	 */
@@ -116,6 +120,19 @@ public class DBManager<K> {
 	@SuppressWarnings("unchecked")
 	public List<DBEntity<K>> listAll(final Class<? extends DBEntity<K>> clazz) {
 		return dao.listAll((Class<DBEntity<K>>) clazz);
+	}
+	
+    /**
+     * List all elements ordering and with limit, zero if no limits. Null if no order.
+     * @param clazz The class of the entity to retrieve.
+     * @param row The row to apply order.
+	 * @param order The order, ASC or DESC. Null if no order.
+	 * @param limit The max number of items. Zero for no limits.
+	 * @return List of items, or an empty list. Never null.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<DBEntity<K>> listAll(final Class<? extends DBEntity<K>> clazz, String row, ORDER_BY order, int limit) {
+		return dao.listAll((Class<DBEntity<K>>) clazz, row, order == null ? null : order.toString(), limit);
 	}
 	
 	/**

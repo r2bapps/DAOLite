@@ -1,5 +1,5 @@
 /*
- * Employee
+ * Department
  * 
  * 0.1
  * 
@@ -32,22 +32,24 @@
 
 package r2b.apps.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import r2b.apps.db.DBEntity;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-public class Employee implements DBEntity<Integer> {
+public class Department implements DBEntity<Integer> {
 
 	private Integer id;
 	private String name;
-	private String surname;
-	private boolean active;
+	private List<Employee> employees = new ArrayList<Employee>();
 	
 	/* DBEntity implementation */
 	
 	@Override
 	public String getTableName() {
-		return Employee.class.getSimpleName();
+		return Department.class.getSimpleName();
 	}
 
 	@Override
@@ -56,14 +58,6 @@ public class Employee implements DBEntity<Integer> {
 		
 		values.put(COL_ID, id);
 	    values.put("name", name);
-	    values.put("surname", surname);
-	    // BOOLEAN in 0 (false) and 1 (true)
-	    if (active) {
-	    	values.put("active", 1);	
-	    }
-	    else {
-	    	values.put("active", 0);
-	    }
 	    
 	    return values;
 	}
@@ -80,7 +74,7 @@ public class Employee implements DBEntity<Integer> {
 	
 	public DBEntity<Integer> valueOf(final Cursor c) {
 		
-		Employee e = new Employee();
+		Department e = new Department();
 		
 		if(c == null) {
 			throw new IllegalArgumentException("Cursor argument is null");
@@ -88,9 +82,6 @@ public class Employee implements DBEntity<Integer> {
 		
 		e.id = Integer.valueOf(c.getInt(c.getColumnIndex(COL_ID)));		
 	    e.name= c.getString(c.getColumnIndex("name"));	    
-	    e.surname = c.getString(c.getColumnIndex("surname"));
-	    // BOOLEAN in 0 (false) and 1 (true)
-	    e.active = c.getInt(c.getColumnIndex("active")) == 0 ? false : true;
 	    
 	    return e;
 	    
@@ -102,7 +93,7 @@ public class Employee implements DBEntity<Integer> {
 	 * Builder.
 	 * Compulsory.
 	 */
-	public Employee() {
+	public Department() {
 		super();
 	}
 
@@ -122,29 +113,22 @@ public class Employee implements DBEntity<Integer> {
 		this.name = name;
 	}
 
-	public String getSurname() {
-		return surname;
+	public List<Employee> getEmployees() {
+		return employees;
 	}
 
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
-
-	public boolean isActive() {
-		return active;
-	}
-
-	public void setActive(boolean active) {
-		this.active = active;
+	public void setEmployees(List<Employee> employees) {
+		this.employees = employees;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (active ? 1231 : 1237);
+		result = prime * result
+				+ ((employees == null) ? 0 : employees.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((surname == null) ? 0 : surname.hashCode());
 		return result;
 	}
 
@@ -156,18 +140,21 @@ public class Employee implements DBEntity<Integer> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Employee other = (Employee) obj;
-		if (active != other.active)
+		Department other = (Department) obj;
+		if (employees == null) {
+			if (other.employees != null)
+				return false;
+		} else if (!employees.equals(other.employees))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
 			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (surname == null) {
-			if (other.surname != null)
-				return false;
-		} else if (!surname.equals(other.surname))
 			return false;
 		return true;
 	}
@@ -175,16 +162,14 @@ public class Employee implements DBEntity<Integer> {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Employee [id=");
+		builder.append("Department [id=");
 		builder.append(id);
 		builder.append(", name=");
 		builder.append(name);
-		builder.append(", surname=");
-		builder.append(surname);
-		builder.append(", active=");
-		builder.append(active);
+		builder.append(", employees=");
+		builder.append(employees);
 		builder.append("]");
 		return builder.toString();
 	}
-	
+
 }

@@ -81,5 +81,15 @@ public interface GenericDao<T, K> {
      * @return List of items, or an empty list. Never null.
      */
 	public List<T> listAll(final Class<T> clazz);
-    
+
+    /**
+     * List all elements ordering and with limit, zero if no limits. Null if no order.
+     * @param clazz The class of the entity to retrieve.
+     * @param row The row to apply order.
+	 * @param order The order, ASC or DESC. Null if no order.
+	 * @param limit The max number of items. Zero for no limits.
+	 * @return List of items, or an empty list. Never null.
+	 */
+	public List<T> listAll(final Class<T> clazz, String row, String order, int limit);
+	
 }

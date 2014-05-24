@@ -33,6 +33,7 @@
 package r2b.apps.db;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import r2b.apps.utils.Logger;
@@ -45,11 +46,16 @@ import android.database.sqlite.SQLiteException;
 /**
  * GenericDao implementation.
  * 
- * @param <T extends DBEntity> Object
+ * @param <T extends DBEntity<?>> Object
  * @param <K> Key
  */
 @SuppressWarnings("rawtypes")
 public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K> {
+	
+	/**
+	 * Incremental flag cache.
+	 */
+	private final HashMap<String, Boolean> incrementalFlagCache = new HashMap<String, Boolean>();
 	
 	/**
 	 * Database instance.
@@ -75,12 +81,14 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			throw new IllegalArgumentException("T table name is null");
 		}		
 		
-		// IMPORTANT: We do this because db table keys are AUTOINCREMENTAL
-		// Removes primary key on content values if it exist
 		ContentValues values = t.getTableContentValues();
-		if(values != null) {
-			values.remove(DBEntity.COL_ID);			
-		}			
+		if(hasIncrementalKey(t.getTableName())) {
+			// IMPORTANT: We do this because db table keys are AUTOINCREMENTAL
+			// Removes primary key on content values if it exist			
+			if(values != null) {
+				values.remove(DBEntity.COL_ID);			
+			}		
+		}		
 
 		// Return: the row ID of the newly inserted row, or -1 if an error occurred
 		int exit = (int) db.insert(t.getTableName(), null, values);
@@ -169,12 +177,14 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		
 		T updated = t;
 		
-		// IMPORTANT: We do this because db table keys are AUTOINCREMENTAL
-		// Removes primary key on content values if it exist
 		ContentValues values = t.getTableContentValues();
-		if(values != null) {
-			values.remove(DBEntity.COL_ID);			
-		}
+		if(hasIncrementalKey(t.getTableName())) {
+			// IMPORTANT: We do this because db table keys are AUTOINCREMENTAL
+			// Removes primary key on content values if it exist			
+			if(values != null) {
+				values.remove(DBEntity.COL_ID);			
+			}		
+		}	
 
 		// Which row to update, based on the ID
 		final String selection = DBEntity.COL_ID + " LIKE ?";
@@ -280,5 +290,91 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<T> listAll(final Class<T> clazz, String row, String order, int limit) {
+		
+		if(clazz == null) {
+			throw new IllegalArgumentException("Clazz argument is null or empty");
+		}
+		
+		try {
+			String tableName = null;
+			{
+				Object obj = clazz.newInstance();
+				tableName = ((DBEntity) obj).getTableName();
+			}
+			
+			List<T> elements = new ArrayList<T>();
+			
+			final Cursor c = db.query(
+				tableName,
+			    null,
+			    null,
+			    null,
+			    null,
+			    null,
+			    order,
+			    limit == 0 ? null : String.valueOf(limit));
+			
+			if (c.moveToFirst()) {
+
+				do {		
+					
+					T element;
+					{
+						Object obj = clazz.newInstance();
+						element = (T) ((DBEntity) obj).valueOf(c);
+					}
+					
+					elements.add(element);	
+					
+					Logger.i(GenericDaoImpl.class.getSimpleName(), 
+							"Retrieve element with id: " + String.valueOf(c.getInt(0)));	    		
+					
+				} while (c.moveToNext());
+				
+			} else {
+				Logger.i(GenericDaoImpl.class.getSimpleName(), "There are no elements.");
+			}
+			
+			c.close();
+			
+			return elements;
+			
+		} catch (IllegalAccessException | 
+				IllegalArgumentException | 
+				ClassCastException | 
+				InstantiationException e) {
+			throw new IllegalStateException(e.toString());
+		}
+	}	
+	
+	/**
+	 * Check if table has incremental key.
+	 * @param table Table to check
+	 * @return true has incremental key, false otherwise.
+	 */
+	private final boolean hasIncrementalKey(final String table) {
+		
+		Boolean exit = incrementalFlagCache.get(table);
+		if(exit == null) {
+			
+			String query = "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'sqlite_sequence'";		
+			Cursor c = db.rawQuery(query, null);
+			if (c != null && c.moveToFirst()) {
+				query = "SELECT name FROM sqlite_sequence WHERE name = '" + table + "'";
+				c = db.rawQuery(query, null);
+				if (c != null && c.moveToFirst()) {
+					exit = true;
+				}
+			}
+			exit = false;	
+			
+		}
+		
+		return exit;
+			
+	}	
 	
 }
