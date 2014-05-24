@@ -213,8 +213,9 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 						Logger.i(DatabaseHandler.class.getSimpleName(), 
 								"Created database table: " + String.valueOf(c.getString(0)));	    							
 					} while (c.moveToNext());
-				}
-				c.close();
+					
+					c.close();
+				}				
 				
 				query = "SELECT name FROM sqlite_master WHERE type = 'index';";
 				c = db.rawQuery(query, null);
@@ -223,8 +224,9 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 						Logger.i(DatabaseHandler.class.getSimpleName(), 
 								"Created database indexes: " + String.valueOf(c.getString(0)));	    							
 					} while (c.moveToNext());
-				}
-				c.close();
+					
+					c.close();
+				}				
 				
 			}
 			
@@ -273,14 +275,24 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 	 * @return
 	 */
 	private Properties loadProperties(final int propertiesFileResId) {	
+		InputStream rawResource = null;
 		try {
-		    InputStream rawResource = mContext.getResources().openRawResource(propertiesFileResId);
+		    rawResource = mContext.getResources().openRawResource(propertiesFileResId);
 		    Properties properties = new Properties();
 		    properties.load(rawResource);
+		    rawResource.close();
 		    return properties;
 		} catch (NotFoundException | IOException e) {
 			Logger.e(DatabaseHandler.class.getSimpleName(), "Can't read database properties", e);
 			throw new RuntimeException(e);
+		} finally {
+			if(rawResource != null) {
+				try {
+					rawResource.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	

@@ -394,8 +394,8 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 				c = db.rawQuery(query, null); // The SQL string must not be ; terminated
 				if (c != null && c.moveToFirst()) {
 					exit = true;
-				}
-				c.close();
+					c.close();
+				}				
 			}
 			exit = false;	
 			
