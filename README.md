@@ -9,7 +9,7 @@ Description
 ===========
 You can use for your Android projects ORMLite, GreenDAO or another ORM. You 
 can make your own DAOs or your SQL queries.
-If you do not need the powerful of an ORM and you don have time to waste 
+If you do not need the powerful of an ORM and you have no time to waste 
 creating your own DAOs, this is your solution.
 
 In all the projects we have worked required at least this level of development. 
@@ -22,7 +22,22 @@ extending an abstract class so that your models can be as complex as you want.
 The main classes are:
 * GenericDAO, the DAO headers.
 * GenericDaoImpl, the DAO implementation.
-* DBEntity, interface to implement your models.
+* DBEntity, interface to implement in your models.
+
+
+
+Documentation
+=============
+You have the [JavaDoc](GenericDAOLite/doc/javadoc) files on doc/javadoc directory, 
+and [UML](GenericDAOLite/doc/uml) diagrams on doc/uml directory.
+
+Class diagram
+-------------
+![Class diagram](GenericDAOLite/doc/uml/ClassDiagram.png?raw=true "Class diagram")
+
+Sample model diagram
+--------------------
+![Sample model diagram](GenericDAOLite/doc/uml/BusinessModelDiagram.png?raw=true "Sample model diagram")
 
 
 
