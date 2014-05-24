@@ -86,7 +86,9 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			// IMPORTANT: We do this because db table keys are AUTOINCREMENTAL
 			// Removes primary key on content values if it exist			
 			if(values != null) {
-				values.remove(DBEntity.COL_ID);			
+				values.remove(DBEntity.COL_ID);	
+				
+				Logger.i(DatabaseHandler.class.getSimpleName(), "Removed col ID");
 			}		
 		}		
 
@@ -182,7 +184,9 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			// IMPORTANT: We do this because db table keys are AUTOINCREMENTAL
 			// Removes primary key on content values if it exist			
 			if(values != null) {
-				values.remove(DBEntity.COL_ID);			
+				values.remove(DBEntity.COL_ID);	
+				
+				Logger.i(DatabaseHandler.class.getSimpleName(), "Removed col ID");
 			}		
 		}	
 
@@ -239,6 +243,9 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			throw new IllegalArgumentException("Clazz argument is null or empty");
 		}
 		
+		Logger.i(DatabaseHandler.class.getSimpleName(), 
+				"listAll " + clazz.getSimpleName());
+		
 		try {
 			String tableName = null;
 			{
@@ -292,11 +299,14 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<T> listAll(final Class<T> clazz, String row, String order, int limit) {
+	public List<T> listAll(final Class<T> clazz, String row, String order, int limit) {		
 		
 		if(clazz == null) {
 			throw new IllegalArgumentException("Clazz argument is null or empty");
 		}
+		
+		Logger.i(DatabaseHandler.class.getSimpleName(), 
+				"listAll " + clazz.getSimpleName() + ", with order " + order + ", and limit " + String.valueOf(limit));
 		
 		try {
 			String tableName = null;
@@ -370,6 +380,9 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 				}
 			}
 			exit = false;	
+			
+			Logger.i(DatabaseHandler.class.getSimpleName(), 
+					"Incremental key on '" + table + "' is: " + String.valueOf(exit));
 			
 		}
 		

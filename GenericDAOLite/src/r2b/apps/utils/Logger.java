@@ -53,7 +53,7 @@ public final class Logger {
 	 *            The message you would like logged.
 	 */
 	public static final void i(String tag, String msg) {
-		if (Cons.DEBUG && Cons.SHOW_LOGS) {
+		if (Cons.SHOW_LOGS) {
 			Log.i(tag, msg);
 		}
 	}
@@ -68,7 +68,7 @@ public final class Logger {
 	 *            The message you would like logged.
 	 */
 	public static final void e(String tag, String msg) {
-		if (Cons.DEBUG && Cons.SHOW_LOGS) {
+		if (Cons.SHOW_LOGS) {
 			Log.e(tag, msg);
 		}
 	}
@@ -85,7 +85,7 @@ public final class Logger {
 	 *            An exception to log.
 	 */
 	public static final void e(String tag, String msg, Throwable tr) {
-		if (Cons.DEBUG && Cons.SHOW_LOGS) {
+		if (Cons.SHOW_LOGS) {
 			Log.e(tag, msg, tr);
 		}
 	}

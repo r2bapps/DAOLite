@@ -54,7 +54,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * NOTE: Foreign key constraints with on delete cascade are supported.
  * It only works since Android 2.2 Froyo which has SQLite 3.6.22
  */
-public final class DatabaseHandler extends SQLiteOpenHelper {
+final class DatabaseHandler extends SQLiteOpenHelper {
 
 	/*
 	 * The SqliteOpenHelper object holds on to one database connection. 
@@ -112,8 +112,8 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 				final File dbFile = context.getDatabasePath(DATABASE_NAME);
 			    if(dbFile != null && dbFile.exists()) {
 					boolean exit = context.deleteDatabase(DATABASE_NAME);
-					if(exit && Cons.DEBUG) {
-						Logger.i(DatabaseHandler.class.getSimpleName(), "Delete database on startup");
+					if(exit) {
+						Logger.i(DatabaseHandler.class.getSimpleName(), "Deleted database on startup");
 					}
 					if(!exit) {
 						Logger.e(DatabaseHandler.class.getSimpleName(), "Can't delete database on startup");
@@ -135,6 +135,7 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	public synchronized static SQLiteDatabase getDatabase() {
 		if (db == null) {
 			db = instance.getWritableDatabase();
+			Logger.i(DatabaseHandler.class.getSimpleName(), "Getting writable database");
 		}
 		return db;
 	}
@@ -145,6 +146,8 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	 */
 	private DatabaseHandler(final Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		Logger.i(DatabaseHandler.class.getSimpleName(), "Database name: " + DATABASE_NAME);
+		Logger.i(DatabaseHandler.class.getSimpleName(), "Database version: " + DATABASE_VERSION);
 	}
 
 	/* (non-Javadoc)
@@ -196,7 +199,7 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 			mContext = null;
 			db.endTransaction();
 			
-			if(Cons.DEBUG) {
+			if(Cons.SHOW_LOGS) {
 				
 				String query = "SELECT name FROM sqlite_master WHERE type = 'table';";
 				Cursor c = db.rawQuery(query, null);
@@ -240,6 +243,8 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 	    if (!db.isReadOnly()) {
 	        // Enable foreign key constraints
 	        db.execSQL("PRAGMA foreign_keys=ON;");
+	        Logger.i(DatabaseHandler.class.getSimpleName(), "Enabling foreign key constraints");
+	        Logger.i(DatabaseHandler.class.getSimpleName(), "Enabling delete on cascade support");
 	    }
 	}
 	
@@ -253,6 +258,7 @@ public final class DatabaseHandler extends SQLiteOpenHelper {
 			instance.close();
 			db = null;
 			instance = null;
+			Logger.i(DatabaseHandler.class.getSimpleName(), "Close database");
 		}
 	}
 	

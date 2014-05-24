@@ -46,6 +46,9 @@ import android.database.sqlite.SQLiteDatabase;
  */
 public class DBManager<K> {
 
+	/**
+	 * Order by clause
+	 */
 	public static enum ORDER_BY {
 		ASC, DESC
 	};
