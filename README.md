@@ -31,9 +31,12 @@ Documentation
 You have the [JavaDoc](GenericDAOLite/doc/javadoc) files on doc/javadoc directory, 
 and [UML](GenericDAOLite/doc/uml) diagrams on doc/uml directory.
 
-
+Class diagram
+-------------
 ![Class diagram](GenericDAOLite/doc/uml/ClassDiagram.png?raw=true "Class diagram")
 
+Sample model diagram
+--------------------
 ![Sample model diagram](GenericDAOLite/doc/uml/BusinessModelDiagram.png?raw=true "Sample model diagram")
 
 
