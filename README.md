@@ -28,7 +28,7 @@ The main classes are:
 
 Documentation
 =============
-You have the [JavaDoc](GenericDAOLite/doc/javadoc/index.html) files on doc/javadoc directory, 
+You have the [JavaDoc](GenericDAOLite/doc/javadoc) files on doc/javadoc directory, 
 and [UML](GenericDAOLite/doc/uml) diagrams on doc/uml directory.
 
 
