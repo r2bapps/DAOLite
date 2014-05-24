@@ -28,13 +28,13 @@ The main classes are:
 
 Documentation
 =============
-You have the [JavaDoc](DAOLite/GenericDAOLite/doc/javadoc/index.html) files on doc/javadoc directory, 
-and [UML](DAOLite/GenericDAOLite/doc/uml) diagrams on doc/uml directory.
+You have the [JavaDoc](GenericDAOLite/doc/javadoc/index.html) files on doc/javadoc directory, 
+and [UML](GenericDAOLite/doc/uml) diagrams on doc/uml directory.
 
 
-![Class diagram](/relative/path/to/img.png?raw=true "Class diagram")
+![Class diagram](GenericDAOLite/doc/uml/ClassDiagram.png?raw=true "Class diagram")
 
-![Sample model diagram](/relative/path/to/img.png?raw=true "Sample model diagram")
+![Sample model diagram](GenericDAOLite/doc/uml/BusinessModelDiagram.png?raw=true "Sample model diagram")
 
 
 
