@@ -22,7 +22,19 @@ extending an abstract class so that your models can be as complex as you want.
 The main classes are:
 * GenericDAO, the DAO headers.
 * GenericDaoImpl, the DAO implementation.
-* DBEntity, interface to implement your models.
+* DBEntity, interface to implement in your models.
+
+
+
+Documentation
+=============
+You have the [JavaDoc](DAOLite/GenericDAOLite/doc/javadoc/index.html) files on doc/javadoc directory, 
+and [UML](DAOLite/GenericDAOLite/doc/uml) diagrams on doc/uml directory.
+
+
+![Class diagram](/relative/path/to/img.png?raw=true "Class diagram")
+
+![Sample model diagram](/relative/path/to/img.png?raw=true "Sample model diagram")
 
 
 
