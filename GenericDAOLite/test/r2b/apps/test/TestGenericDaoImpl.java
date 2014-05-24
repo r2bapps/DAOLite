@@ -71,7 +71,7 @@ public class TestGenericDaoImpl extends AndroidTestCase {
 		d.setKey(id);
 		d.setName("R");
 		
-		Department aux = (Department) dbManager.create(d);
+		Department aux = (Department) dbManager.create(d);		
 		int auxId = aux.getId();
 		// Inserted "id" is autoincremental.
 		assertTrue(id != aux.getId());	
@@ -96,7 +96,7 @@ public class TestGenericDaoImpl extends AndroidTestCase {
 		} catch (IllegalArgumentException e) {}
 	}
 
-	public void testRetrieve() {				
+	public void testRetrieveEmployee() {				
 		// Insert data to test
 		dbManager.create(e);
 		
@@ -115,7 +115,28 @@ public class TestGenericDaoImpl extends AndroidTestCase {
 		assertNull(dbManager.retrieve(-1, Employee.class));
 	}
 
-	public void testUpdate() {		
+	public void testRetrieveDepartment() {				
+		// Insert data to test
+		dbManager.create(d);
+		
+		// Tests		
+		assertEquals(null, ((Department)dbManager.retrieve(d.getKey(), Department.class)).getName());
+
+		d.setName("jooola");
+		dbManager.create(d);
+		assertEquals("jooola", ((Department)dbManager.retrieve(d.getKey(), Department.class)).getName());
+		
+		// Retrieve null id crashes
+		try {
+			dbManager.retrieve(null, Department.class);
+			fail();
+		} catch (IllegalArgumentException d) {}
+		// Retrieve not stored id return null Department
+		assertNull(dbManager.retrieve(-1, Department.class));
+	}
+
+	
+	public void testUpdateEmployee() {		
 		// Insert data to test
 		dbManager.create(e);
 		
@@ -137,7 +158,29 @@ public class TestGenericDaoImpl extends AndroidTestCase {
 		} catch (IllegalArgumentException e) {}
 	}
 
-	public void testDelete() {		
+	public void testUpdateDepartment() {		
+		// Insert data to test
+		dbManager.create(d);
+		
+		// Tests
+		
+		// Update the same return the same
+		assertSame(d, dbManager.update(d));
+		
+		// Update not stored crashes		
+		try {
+			assertNull(dbManager.update(dAux));
+			fail();
+		} catch (IllegalArgumentException e) {}
+		
+		// Update null crashes
+		try {
+			dbManager.update(null);
+			fail();
+		} catch (IllegalArgumentException e) {}
+	}
+	
+	public void testDeleteEmployee() {		
 		// Insert data to test
 		dbManager.create(e);
 		
@@ -159,7 +202,29 @@ public class TestGenericDaoImpl extends AndroidTestCase {
 		} catch (IllegalArgumentException e) {}
 	}
 
-	public void testListAll() {	
+	public void testDeleteDepartment() {		
+		// Insert data to test
+		dbManager.create(d);
+		
+		// Tests
+		
+		// Delete stored id return void
+		dbManager.delete(d);
+		assertNull(dbManager.retrieve(d.getKey(), Department.class));
+		
+		// Delete not stored employee crashes
+		try {
+			dbManager.delete(dAux);
+			fail();
+		} catch (IllegalArgumentException e) {}
+		// Delete null crash
+		try {
+			dbManager.delete(null);
+			fail();
+		} catch (IllegalArgumentException e) {}
+	}
+	
+	public void testListAllEmployee() {	
 		// ListAll return empty list
 		assertNotNull(dbManager.listAll(Employee.class));
 		assertTrue(dbManager.listAll(Employee.class).isEmpty());
@@ -180,6 +245,29 @@ public class TestGenericDaoImpl extends AndroidTestCase {
 		dbManager.delete(aux);
 		assertNotNull(dbManager.listAll(Employee.class));
 		assertTrue(dbManager.listAll(Employee.class).isEmpty());
+	}
+
+	public void testListAllDepartment() {	
+		// ListAll return empty list
+		assertNotNull(dbManager.listAll(Department.class));
+		assertTrue(dbManager.listAll(Department.class).isEmpty());
+		
+		// ListAll return one item
+		dbManager.create(d);
+		assertTrue(dbManager.listAll(Department.class).size() == 1);
+		
+		// ListAll return two item
+		dbManager.create(dAux);
+		assertTrue(dbManager.listAll(Department.class).size() == 2);
+		
+		// ListAll return one item
+		dbManager.delete(d);
+		assertTrue(dbManager.listAll(Department.class).size() == 1);
+		
+		// ListAll return empty list
+		dbManager.delete(dAux);
+		assertNotNull(dbManager.listAll(Department.class));
+		assertTrue(dbManager.listAll(Department.class).isEmpty());
 	}
 
 }

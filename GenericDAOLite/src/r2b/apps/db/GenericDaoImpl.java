@@ -33,8 +33,8 @@
 package r2b.apps.db;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import r2b.apps.utils.Logger;
 import android.content.ContentValues;
@@ -55,7 +55,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 	/**
 	 * Incremental flag cache.
 	 */
-	private final HashMap<String, Boolean> incrementalFlagCache = new HashMap<String, Boolean>();
+	private final Map<String, Boolean> incrementalFlagCache;
 	
 	/**
 	 * Database instance.
@@ -65,9 +65,11 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 	/**
 	 * Builder.
 	 * @param db the database instance.
+	 * @param incrementalFlagCache The incremental keys.
 	 */
-	public GenericDaoImpl(SQLiteDatabase db) {	
+	public GenericDaoImpl(SQLiteDatabase db, final Map<String, Boolean> incrementalFlagCache) {	
 		this.db = db;
+		this.incrementalFlagCache = incrementalFlagCache;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,7 +84,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		}		
 		
 		ContentValues values = t.getTableContentValues();
-		if(hasIncrementalKey(t.getTableName())) {
+		if(incrementalFlagCache.get(t.getTableName())) {
 			// IMPORTANT: We do this because db table keys are AUTOINCREMENTAL
 			// Removes primary key on content values if it exist			
 			if(values != null) {
@@ -185,7 +187,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		T updated = t;
 		
 		ContentValues values = t.getTableContentValues();
-		if(hasIncrementalKey(t.getTableName())) {
+		if(incrementalFlagCache.get(t.getTableName())) {
 			// IMPORTANT: We do this because db table keys are AUTOINCREMENTAL
 			// Removes primary key on content values if it exist			
 			if(values != null) {
@@ -376,39 +378,5 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		}
 	}	
 	
-	/**
-	 * Check if table has incremental key.
-	 * @param table Table to check
-	 * @return true has incremental key, false otherwise.
-	 */
-	private final boolean hasIncrementalKey(final String table) {
-		
-		Boolean exit = incrementalFlagCache.get(table);
-		if(exit == null) {
-			
-			String query = "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'sqlite_sequence'";		
-			Cursor c = db.rawQuery(query, null); // The SQL string must not be ; terminated
-			if (c != null && c.moveToFirst()) {
-				c.close();
-				query = "SELECT name FROM sqlite_sequence WHERE name = '" + table + "'";
-				c = db.rawQuery(query, null); // The SQL string must not be ; terminated
-				if (c != null && c.moveToFirst()) {
-					exit = true;
-					c.close();
-				}				
-			}
-			exit = false;	
-			
-			incrementalFlagCache.put(table, exit);
-			
-			Logger.i(DatabaseHandler.class.getSimpleName(), 
-					"Incremental key on '" + table + "' is: " + String.valueOf(exit));
-			
-		}
-		
-		//return exit;
-		return true;
-			
-	}	
 	
 }

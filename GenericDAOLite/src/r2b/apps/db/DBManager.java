@@ -71,7 +71,7 @@ public class DBManager<K> {
 		
 		final SQLiteDatabase db = DatabaseHandler.getDatabase();
 		
-		dao = new GenericDaoImpl<DBEntity<K>, K>(db);
+		dao = new GenericDaoImpl<DBEntity<K>, K>(db, handler.getIncrementalKeys());
 	}
 	
 	/**

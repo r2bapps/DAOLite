@@ -37,11 +37,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import r2b.apps.R;
 import r2b.apps.utils.Cons;
 import r2b.apps.utils.Logger;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
@@ -96,6 +99,10 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 	 * Application context.
 	 */
 	private static Context mContext;
+	/**
+	 * Incremental key cache.
+	 */
+	private final HashMap<String, Boolean> incrementalFlagCache = new HashMap<String, Boolean>();
 	
 	/**
 	 * Init the database.
@@ -265,8 +272,26 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 			db.close();			
 			db = null;
 			instance = null;
+			incrementalFlagCache.clear();
 			Logger.i(DatabaseHandler.class.getSimpleName(), "Close database");
 		}
+	}
+	
+	/**
+	 * Get the incremental keys by tablets.
+	 * @return True if has key, false otherwise.
+	 */
+	synchronized final Map<String, Boolean> getIncrementalKeys() {
+		return incrementalFlagCache;
+	}
+
+	/**
+	 * Add incremental key on flag cache.
+	 * @param table The table
+	 * @param hasKey True has incremental key, false otherwise.
+	 */
+	private void addIncrementalKeys(final String table, final Boolean hasKey) {
+		incrementalFlagCache.put(table, hasKey);
 	}
 	
 	/**
@@ -298,10 +323,12 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 	
 	/**
 	 * Build create table query.
+	 * Populates incrementalFlagCache.
 	 * @param tables
 	 * @param properties
 	 * @return
 	 */
+	@SuppressLint("DefaultLocale")
 	private StringBuilder[] createTable(StringBuilder[] tables, final Properties properties) {
 		
 		if(properties == null) {
@@ -314,6 +341,19 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 	    while (e.hasMoreElements()) {
 	      String key = (String) e.nextElement();
 	      String value = properties.getProperty(key);
+	      
+	      // Add info of incremental keys
+	      if(value.toUpperCase().contains("AUTOINCREMENT")) {
+	    	  addIncrementalKeys(key.trim(), true);
+		      Logger.i(DatabaseHandler.class.getSimpleName(), 
+						"Incremental key on '" + key.trim() + "' is: " + String.valueOf(true));
+	      }
+	      else {
+	    	  addIncrementalKeys(key.trim(), false);
+		      Logger.i(DatabaseHandler.class.getSimpleName(), 
+						"Incremental key on '" + key.trim() + "' is: " + String.valueOf(false));
+	      }	      
+
 	      
 	      tables[i] = new StringBuilder();
 	      	      
