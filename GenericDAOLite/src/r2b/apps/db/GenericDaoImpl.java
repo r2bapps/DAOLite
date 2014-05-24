@@ -116,6 +116,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			throw new IllegalArgumentException("Clazz argument is null or empty");
 		}
 		
+		Cursor c = null;
 		try {
 			String tableName = null;
 			{
@@ -128,7 +129,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			final String selection = DBEntity.COL_ID + " LIKE ?"; 
 			final String[] selectionArgs = { String.valueOf(id) };
 			
-			final Cursor c = db.query(
+			c = db.query(
 				tableName,
 			    null,
 			    selection,
@@ -160,6 +161,10 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 				ClassCastException | 
 				InstantiationException e) {
 			throw new IllegalStateException(e.toString());
+		} finally {
+			if(c != null && !c.isClosed()){
+		        c.close();
+		    }  
 		}
 	}
 	
@@ -246,6 +251,8 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		Logger.i(DatabaseHandler.class.getSimpleName(), 
 				"listAll " + clazz.getSimpleName());
 		
+		Cursor c = null;
+		
 		try {
 			String tableName = null;
 			{
@@ -255,7 +262,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			
 			List<T> elements = new ArrayList<T>();
 			
-			final Cursor c = db.query(
+			c = db.query(
 				tableName,
 			    null,
 			    null,
@@ -294,6 +301,10 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 				ClassCastException | 
 				InstantiationException e) {
 			throw new IllegalStateException(e.toString());
+		} finally {
+			if(c != null && !c.isClosed()){
+		        c.close();
+		    }  
 		}
 	}
 	
@@ -308,6 +319,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		Logger.i(DatabaseHandler.class.getSimpleName(), 
 				"listAll " + clazz.getSimpleName() + ", with order " + order + ", and limit " + String.valueOf(limit));
 		
+		Cursor c = null;
 		try {
 			String tableName = null;
 			{
@@ -317,7 +329,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			
 			List<T> elements = new ArrayList<T>();
 			
-			final Cursor c = db.query(
+			c = db.query(
 				tableName,
 			    null,
 			    null,
@@ -357,6 +369,10 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 				ClassCastException | 
 				InstantiationException e) {
 			throw new IllegalStateException(e.toString());
+		} finally {
+			if(c != null && !c.isClosed()){
+		        c.close();
+		    }  
 		}
 	}	
 	
@@ -371,22 +387,27 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		if(exit == null) {
 			
 			String query = "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'sqlite_sequence'";		
-			Cursor c = db.rawQuery(query, null);
+			Cursor c = db.rawQuery(query, null); // The SQL string must not be ; terminated
 			if (c != null && c.moveToFirst()) {
+				c.close();
 				query = "SELECT name FROM sqlite_sequence WHERE name = '" + table + "'";
-				c = db.rawQuery(query, null);
+				c = db.rawQuery(query, null); // The SQL string must not be ; terminated
 				if (c != null && c.moveToFirst()) {
 					exit = true;
 				}
+				c.close();
 			}
 			exit = false;	
+			
+			incrementalFlagCache.put(table, exit);
 			
 			Logger.i(DatabaseHandler.class.getSimpleName(), 
 					"Incremental key on '" + table + "' is: " + String.valueOf(exit));
 			
 		}
 		
-		return exit;
+		//return exit;
+		return true;
 			
 	}	
 	

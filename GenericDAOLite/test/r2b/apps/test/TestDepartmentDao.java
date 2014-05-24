@@ -1,10 +1,7 @@
 package r2b.apps.test;
 
-import java.io.File;
-
 import r2b.apps.db.DBManager;
 import r2b.apps.model.Employee;
-import r2b.apps.utils.Cons;
 import android.test.AndroidTestCase;
 
 public class TestDepartmentDao extends AndroidTestCase {
@@ -12,16 +9,6 @@ public class TestDepartmentDao extends AndroidTestCase {
 	private DBManager<Integer> dbManager;
 	private Employee e;
 	private Employee aux;
-	
-	private void clearAll() {
-		final File dbFile = getContext().getDatabasePath(Cons.DB.DATABASE_NAME);
-	    if(dbFile != null && dbFile.exists()) {
-			boolean exit = getContext().deleteDatabase(Cons.DB.DATABASE_NAME);
-			if(!exit) {
-				fail("Can't delete database on startup");
-			}
-	    }
-	}
 	
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -33,7 +20,7 @@ public class TestDepartmentDao extends AndroidTestCase {
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		clearAll();
+		dbManager.close();
 	}
 
 	public void testCreate() {				

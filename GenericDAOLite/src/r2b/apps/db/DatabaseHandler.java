@@ -106,25 +106,30 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 	 * @return The db handler.
 	 */
 	public synchronized static DatabaseHandler init(final Context context) {
-		if(instance == null) { 
+		
+		if(Cons.DB.CLEAR_DB_ON_START) {
 			
-			if(Cons.DB.CLEAR_DB_ON_START) {
-				final File dbFile = context.getDatabasePath(DATABASE_NAME);
-			    if(dbFile != null && dbFile.exists()) {
-					boolean exit = context.deleteDatabase(DATABASE_NAME);
-					if(exit) {
-						Logger.i(DatabaseHandler.class.getSimpleName(), "Deleted database on startup");
-					}
-					if(!exit) {
-						Logger.e(DatabaseHandler.class.getSimpleName(), "Can't delete database on startup");
-						throw new RuntimeException("Can't delete database on startup");						
-					}
-			    }
+			if (instance != null) {
+				instance.close();
 			}
 			
+			final File dbFile = context.getDatabasePath(DATABASE_NAME);
+		    if(dbFile != null && dbFile.exists()) {
+				boolean exit = context.deleteDatabase(DATABASE_NAME);
+				if(exit) {
+					Logger.i(DatabaseHandler.class.getSimpleName(), "Deleted database on startup");
+				}
+				if(!exit) {
+					Logger.e(DatabaseHandler.class.getSimpleName(), "Can't delete database on startup");
+					throw new RuntimeException("Can't delete database on startup");						
+				}
+		    }
+		}	
+		
+		if(instance == null) { 						
 			instance = new DatabaseHandler(context);
 			mContext = context.getApplicationContext();
-		}
+		}				
 		return instance;
 	}
 	
@@ -209,7 +214,7 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 								"Created database table: " + String.valueOf(c.getString(0)));	    							
 					} while (c.moveToNext());
 				}
-				
+				c.close();
 				
 				query = "SELECT name FROM sqlite_master WHERE type = 'index';";
 				c = db.rawQuery(query, null);
@@ -219,6 +224,7 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 								"Created database indexes: " + String.valueOf(c.getString(0)));	    							
 					} while (c.moveToNext());
 				}
+				c.close();
 				
 			}
 			
@@ -254,8 +260,7 @@ final class DatabaseHandler extends SQLiteOpenHelper {
 	@Override
 	public synchronized void close() {
 		if (db != null) {
-			db.close();
-			instance.close();
+			db.close();			
 			db = null;
 			instance = null;
 			Logger.i(DatabaseHandler.class.getSimpleName(), "Close database");

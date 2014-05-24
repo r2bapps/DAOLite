@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="r2b.apps"
     android:versionCode="0"
-    android:versionName="0.1" >
+    android:versionName="0.2" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -14,6 +14,7 @@
 
     <application
         android:icon="@drawable/ic_launcher"
+        android:label="GenericDAOLite"
         android:allowBackup="true" >
         <uses-library android:name="android.test.runner" />
     </application>

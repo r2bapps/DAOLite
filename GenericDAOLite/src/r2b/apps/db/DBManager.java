@@ -143,6 +143,7 @@ public class DBManager<K> {
 	 */
 	public void close() {
 		handler.close();
+		dao = null;
 	}
 	
 }
