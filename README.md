@@ -52,6 +52,13 @@ Developed by
 ============
 R2B Apps
 
+If you use DAOLite code in your application you should inform R2B Apps about it ( *email: r2b.apps[at]gmail[dot]com* ) like this:
+> **Subject:** DAOLite usage notification<br />
+> **Text:** I use Universal Image Loader &lt;lib_version> in &lt;application_name> - http://link_to_google_play.
+> I [allow | don't allow] to mention my app in section "Applications using DAOLite" on GitHub.
+
+Also We will be grateful if you mention DAOLite in application UI with string **"Using DAOLite (c) 2014, R2B Apps"** (e.g. in some "About" section).
+
 
 
 License
