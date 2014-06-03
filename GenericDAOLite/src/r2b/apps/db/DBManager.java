@@ -34,7 +34,9 @@ package r2b.apps.db;
 
 import java.util.List;
 
+import r2b.apps.utils.Logger;
 import android.content.Context;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 
@@ -51,8 +53,7 @@ public class DBManager<K> {
 	 */
 	public static enum ORDER_BY {
 		ASC, DESC
-	};
-	
+	};	
 	/**
 	 * DB handler.
 	 */
@@ -61,6 +62,10 @@ public class DBManager<K> {
 	 * Generic DAO.
 	 */
 	private GenericDao<DBEntity<K>, K> dao;
+	/**
+	 * Database.
+	 */
+	private final SQLiteDatabase db;
 	
 	/**
 	 * Builder.
@@ -69,7 +74,7 @@ public class DBManager<K> {
 	public DBManager(final Context context) {
 		handler = DatabaseHandler.init(context.getApplicationContext());
 		
-		final SQLiteDatabase db = DatabaseHandler.getDatabase();
+		db = DatabaseHandler.getDatabase();
 		
 		dao = new GenericDaoImpl<DBEntity<K>, K>(db, handler.getIncrementalKeys());
 	}
@@ -137,6 +142,93 @@ public class DBManager<K> {
 	public List<DBEntity<K>> listAll(final Class<? extends DBEntity<K>> clazz, String row, ORDER_BY order, int limit) {
 		return dao.listAll((Class<DBEntity<K>>) clazz, row, order == null ? null : order.toString(), limit);
 	}
+	
+	/**
+	 * Bulk insert properly with transactions.
+	 * @param list The items to insert.
+	 * @throws IllegalArgumentException, when list is null.
+	 */
+	public void bulkInsert(List<DBEntity<K>> list) throws IllegalArgumentException {
+		
+		if(list == null) {
+			throw new IllegalArgumentException("list argument is null");
+		}
+		
+		try {
+			
+			db.beginTransaction();
+			
+			for(DBEntity<K> item : list) {
+				dao.create(item);	
+			}			
+			
+			db.setTransactionSuccessful();									
+
+		} catch (SQLException e) {
+			Logger.e(DBManager.class.getSimpleName(), "Can't bulk insert", e);
+			throw new RuntimeException(e);
+		} finally {						
+			db.endTransaction();			
+		}
+	}
+	
+	/**
+	 * Bulk update properly with transactions.
+	 * @param list The items to update.
+	 * @throws IllegalArgumentException, when list is null.
+	 */
+	public void bulkUpdate(List<DBEntity<K>> list) throws IllegalArgumentException {
+		
+		if(list == null) {
+			throw new IllegalArgumentException("list argument is null");
+		}
+		
+		try {
+			
+			db.beginTransaction();
+			
+			for(DBEntity<K> item : list) {
+				dao.update(item);	
+			}			
+			
+			db.setTransactionSuccessful();									
+
+		} catch (SQLException e) {
+			Logger.e(DBManager.class.getSimpleName(), "Can't bulk update", e);
+			throw new RuntimeException(e);
+		} finally {						
+			db.endTransaction();			
+		}
+	}
+	
+	/**
+	 * Bulk delete properly with transactions.
+	 * @param list The items to delete.
+	 * @throws IllegalArgumentException, when list is null.
+	 */
+	public void bulkDelete(List<DBEntity<K>> list) throws IllegalArgumentException {
+		
+		if(list == null) {
+			throw new IllegalArgumentException("list argument is null");
+		}
+		
+		try {
+			
+			db.beginTransaction();
+			
+			for(DBEntity<K> item : list) {
+				dao.delete(item);	
+			}			
+			
+			db.setTransactionSuccessful();									
+
+		} catch (SQLException e) {
+			Logger.e(DBManager.class.getSimpleName(), "Can't bulk delete", e);
+			throw new RuntimeException(e);
+		} finally {						
+			db.endTransaction();			
+		}
+	}	
 	
 	/**
 	 * Close the db.

@@ -118,6 +118,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			throw new IllegalArgumentException("Clazz argument is null or empty");
 		}
 		
+		T element = null;
 		Cursor c = null;
 		try {
 			String tableName = null;
@@ -125,8 +126,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 				Object obj = clazz.newInstance();
 				tableName = ((DBEntity) obj).getTableName();
 			}
-			
-			T element = null;
+						
 
 			final String selection = DBEntity.COL_ID + " LIKE ?"; 
 			final String[] selectionArgs = { String.valueOf(id) };
@@ -154,10 +154,6 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 				Logger.i(GenericDaoImpl.class.getSimpleName(), "There is no element with id: " + String.valueOf(id));
 			}
 			
-			c.close();
-			
-			return element;
-			
 		} catch (IllegalAccessException | 
 				IllegalArgumentException | 
 				ClassCastException | 
@@ -168,6 +164,8 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		        c.close();
 		    }  
 		}
+		
+		return element;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -253,6 +251,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		Logger.i(DatabaseHandler.class.getSimpleName(), 
 				"listAll " + clazz.getSimpleName());
 		
+		List<T> elements = new ArrayList<T>();
 		Cursor c = null;
 		
 		try {
@@ -261,8 +260,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 				Object obj = clazz.newInstance();
 				tableName = ((DBEntity) obj).getTableName();
 			}
-			
-			List<T> elements = new ArrayList<T>();
+						
 			
 			c = db.query(
 				tableName,
@@ -293,11 +291,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 			} else {
 				Logger.i(GenericDaoImpl.class.getSimpleName(), "There are no elements.");
 			}
-			
-			c.close();
-			
-			return elements;
-			
+						
 		} catch (IllegalAccessException | 
 				IllegalArgumentException | 
 				ClassCastException | 
@@ -308,6 +302,8 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		        c.close();
 		    }  
 		}
+		
+		return elements;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -321,15 +317,14 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		Logger.i(DatabaseHandler.class.getSimpleName(), 
 				"listAll " + clazz.getSimpleName() + ", with order " + order + ", and limit " + String.valueOf(limit));
 		
+		List<T> elements = new ArrayList<T>();
 		Cursor c = null;
 		try {
 			String tableName = null;
 			{
 				Object obj = clazz.newInstance();
 				tableName = ((DBEntity) obj).getTableName();
-			}
-			
-			List<T> elements = new ArrayList<T>();
+			}						
 			
 			c = db.query(
 				tableName,
@@ -360,11 +355,7 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 				
 			} else {
 				Logger.i(GenericDaoImpl.class.getSimpleName(), "There are no elements.");
-			}
-			
-			c.close();
-			
-			return elements;
+			}			
 			
 		} catch (IllegalAccessException | 
 				IllegalArgumentException | 
@@ -376,6 +367,8 @@ public class GenericDaoImpl<T extends DBEntity<?>, K> implements GenericDao<T, K
 		        c.close();
 		    }  
 		}
+		
+		return elements;
 	}	
 	
 	
