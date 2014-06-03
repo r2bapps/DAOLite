@@ -3,7 +3,7 @@
   realizations="true" associations="true" dependencies="false" nesting-relationships="true">  
   <class id="1" language="java" name="r2b.apps.utils.Logger" project="GenericDAOLite" 
     file="/GenericDAOLite/src/r2b/apps/utils/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="106" y="637"/>    
+    <position height="-1" width="-1" x="107" y="681"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="true" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -21,7 +21,7 @@
   </enumeration>  
   <class id="3" language="java" name="r2b.apps.utils.Cons" project="GenericDAOLite" 
     file="/GenericDAOLite/src/r2b/apps/utils/Cons.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="326" y="641"/>    
+    <position height="-1" width="-1" x="326" y="682"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="true" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -30,7 +30,7 @@
   </class>  
   <interface id="4" language="java" name="r2b.apps.db.GenericDao" project="GenericDAOLite" 
     file="/GenericDAOLite/src/r2b/apps/db/GenericDao.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="236" y="120"/>    
+    <position height="-1" width="-1" x="159" y="103"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="true" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -39,7 +39,7 @@
   </interface>  
   <interface id="5" language="java" name="r2b.apps.db.DBEntity" project="GenericDAOLite" 
     file="/GenericDAOLite/src/r2b/apps/db/DBEntity.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="675" y="659"/>    
+    <position height="-1" width="-1" x="681" y="745"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="true" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -48,7 +48,7 @@
   </interface>  
   <class id="6" language="java" name="r2b.apps.db.DatabaseHandler" project="GenericDAOLite" 
     file="/GenericDAOLite/src/r2b/apps/db/DatabaseHandler.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="641" y="397"/>    
+    <position height="-1" width="-1" x="640" y="465"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="true" signature="true" accessors="true" 
       visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
@@ -64,16 +64,7 @@
       <operations public="true" package="true" protected="true" private="false" static="true"/>    
     </display>  
   </class>  
-  <class id="8" language="java" name="r2b.apps.db.GenericDaoImpl" project="GenericDAOLite" 
-    file="/GenericDAOLite/src/r2b/apps/db/GenericDaoImpl.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="233" y="384"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="true" signature="true" accessors="true" 
-      visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="false" static="true"/>    
-    </display>  
-  </class>  
-  <class id="9" language="java" name="r2b.apps.db.DBManager" project="GenericDAOLite" 
+  <class id="8" language="java" name="r2b.apps.db.DBManager" project="GenericDAOLite" 
     file="/GenericDAOLite/src/r2b/apps/db/DBManager.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="638" y="123"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="true" signature="true" accessors="true" 
@@ -82,42 +73,38 @@
       <operations public="true" package="true" protected="true" private="false" static="true"/>    
     </display>  
   </class>  
-  <nesting id="10">    
-    <end type="SOURCE" refId="3"/>    
-    <end type="TARGET" refId="7"/>  
-  </nesting>  
-  <association id="11">    
+  <association id="9">    
     <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="12" name="instance"/>      
-      <multiplicity id="13" minimum="0" maximum="1"/>    
+      <attribute id="10" name="instance"/>      
+      <multiplicity id="11" minimum="0" maximum="1"/>    
     </end>    
     <end type="TARGET" refId="6" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <realization id="14">    
-    <end type="SOURCE" refId="8"/>    
-    <end type="TARGET" refId="4"/>  
-  </realization>  
-  <association id="15">    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="16" name="handler"/>      
-      <multiplicity id="17" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="18">    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="19" name="dao"/>      
-      <multiplicity id="20" minimum="0" maximum="1"/>    
+  <association id="12">    
+    <end type="SOURCE" refId="8" navigable="false">      
+      <attribute id="13" name="dao"/>      
+      <multiplicity id="14" minimum="0" maximum="1"/>    
     </end>    
     <end type="TARGET" refId="4" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <nesting id="21">    
-    <end type="SOURCE" refId="9"/>    
+  <nesting id="15">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="7"/>  
+  </nesting>  
+  <nesting id="16">    
+    <end type="SOURCE" refId="8"/>    
     <end type="TARGET" refId="2"/>  
   </nesting>  
+  <association id="17">    
+    <end type="SOURCE" refId="8" navigable="false">      
+      <attribute id="18" name="handler"/>      
+      <multiplicity id="19" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="6" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="true" signature="true" 
     accessors="true" visibility="true">    
     <attributes public="true" package="true" protected="true" private="true" static="true"/>    

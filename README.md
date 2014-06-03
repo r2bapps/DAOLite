@@ -5,6 +5,15 @@ A generic & lite DAO for Android
 
 
 
+Main functionality
+------------------
+CRUD operations.
+Bulk CUD operations inside transactions.
+Delete on cascade support.
+Referential integrity check support.
+
+
+
 Description
 ===========
 You can use for your Android projects ORMLite, GreenDAO or another ORM. You 
