@@ -7,10 +7,10 @@ A generic & lite DAO for Android
 
 Main functionality
 ------------------
-CRUD operations.
-Bulk CUD operations inside transactions.
-Delete on cascade support.
-Referential integrity check support.
+* CRUD operations.
+* Bulk CUD operations inside transactions.
+* Delete on cascade support.
+* Referential integrity check support.
 
 
 
