@@ -1,7 +1,7 @@
 /*
  * Logger
  * 
- * 0.1
+ * 0.2
  * 
  * 2014/05/16
  * 
@@ -89,5 +89,22 @@ public final class Logger {
 			Log.e(tag, msg, tr);
 		}
 	}
+	
+	/**
+	 * Send a INFO log message for performance notice.
+	 * 
+	 * @param tag
+	 *            Used to identify the source of a log message. It usually
+	 *            identifies the class or activity where the log call occurs.
+	 * @param method
+	 *            Used to identify the method of a log performance message.
+	 * @param time
+	 *            The performance time in milliseconds you would like logged.
+	 */
+	public static final void performance(String tag, String method, long time) {
+		if (Cons.SHOW_LOGS) {
+			Log.i("Performance:" + tag, method + ": " + String.valueOf(time) + " ms");
+		}
+	}	
 
 }
