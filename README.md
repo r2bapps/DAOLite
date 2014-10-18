@@ -13,6 +13,9 @@ Main functionality
 * Referential integrity check support.
 
 
+![Development closed](https://raw.githubusercontent.com/r2bapps/DAOLite/gh-pages/greenline.png?raw=true "Development closed")
+
+
 
 Description
 ===========
