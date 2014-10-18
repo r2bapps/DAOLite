@@ -1,3 +1,6 @@
+<b>Development closed</b>
+
+![Development closed](https://raw.githubusercontent.com/r2bapps/DAOLite/gh-pages/greenline.png?raw=true)
 DAOLite
 =======
 
@@ -11,9 +14,6 @@ Main functionality
 * Bulk CUD operations inside transactions.
 * Delete on cascade support.
 * Referential integrity check support.
-
-
-![Development closed](https://raw.githubusercontent.com/r2bapps/DAOLite/gh-pages/greenline.png?raw=true "Development closed")
 
 
 
